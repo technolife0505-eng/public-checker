@@ -110,7 +110,7 @@ def scan_channel_for_keywords(channel_link, keywords, days=2):
         for kw in keywords:
             keyword = kw.keyword
             cnt = count_kw(p["text"], keyword)
-            if cnt >= 2:
+            if cnt >= 1:
                 out.append({
                     **p,
                     "matched_keyword": keyword,
