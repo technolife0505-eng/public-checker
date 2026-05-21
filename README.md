@@ -1,40 +1,42 @@
-# Telegram Public Realtime Checker
+# Telegram Public Checker v2
 
-Bu versiya Telegram API, telefon login kodi va api_hashsiz ishlaydi. Faqat public Telegram kanal linklarini tekshiradi.
+## Yangi imkoniyatlar
 
-## Ishlaydigan linklar
+- Har 1 minut avtomatik scan
+- “Real tekshirish” bosilganda oxirgi 2 kunlik postlarni tekshiradi
+- Kalit so‘z yoki kalit gap 2 va undan ko‘p uchrasa bazaga yozadi
+- Bitta xabarda bir nechta keyword/gap mos kelsa, har biri alohida saqlanadi
+- PostgreSQL support
+- Browser notification
+- Telegram bot alert
+- Grafiklar
+- Keyword analytics
+- Channel analytics
+- AI classification
+- Sentiment analysis
+- CSV export
 
-```text
-https://t.me/kunuzofficial
-https://t.me/daryo
-https://t.me/gazetauz_ozb
+## Render Start Command
+
+```bash
+uvicorn app:app --host 0.0.0.0 --port $PORT
 ```
 
-## Ishlamaydigan linklar
-
-```text
-https://t.me/+privateInvite
-private group
-yopiq kanal
-```
-
-## Ishga tushirish
+## Render Build Command
 
 ```bash
 pip install -r requirements.txt
-python app.py
 ```
 
-Keyin brauzerda:
+## Render Environment Variables
 
-```text
-http://127.0.0.1:8000
+```env
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DB
+AUTO_SCAN_ENABLED=true
+SCAN_INTERVAL_SECONDS=60
+REAL_SCAN_DAYS=2
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_ALERT_CHAT_ID=
 ```
 
-## Qanday ishlaydi?
-
-1. Public kanal linkini qo‘shasiz.
-2. Kalit so‘z qo‘shasiz.
-3. “Real tekshirishni boshlash” tugmasini bosasiz.
-4. Agar public post ichida keyword 2 yoki undan ko‘p marta kelsa, SQLite bazaga yoziladi.
-5. Natija web jadvalda ko‘rinadi.
+`DATABASE_URL` bo‘lmasa SQLite ishlaydi.
