@@ -91,4 +91,5 @@ def export_csv():
     for r in rows:
         wr.writerow([r.id, r.channel_username, r.message_url, r.matched_keyword, r.repetition_count, r.message_time, r.ai_classification, r.sentiment, r.message_text])
     out.seek(0)
-    return StreamingResponse(iter([out.getvalue()]), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=telegram_public_results_v2.csv"})
+    content = '\ufeff' + out.getvalue()
+    return StreamingResponse(iter([content]), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=telegram_public_results_v2.csv"})
