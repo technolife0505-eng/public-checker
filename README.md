@@ -1,42 +1,23 @@
-# Telegram Public Checker v2
+# Media Monitoring Platform v3
 
-## Yangi imkoniyatlar
+Bu versiyada:
+- Channels o‘rniga Sources qo‘shildi.
+- Platform tanlash: Telegram, Facebook, Instagram, YouTube, X/Twitter, TikTok, News/RSS, VK, OK, Reddit.
+- Hozir real scan faqat Telegram public channel uchun ishlaydi.
+- Kelajakda boshqa platformalar shu Sources arxitekturasi orqali ulanadi.
+- Source language: UZ/RU/EN.
+- Keyword/gap, User category, Priority.
+- User category va AI class alohida.
+- FVV/Ob-havo AI classification yaxshilandi.
+- Sentiment: positive, neutral, negative, risk.
+- Sana oralig‘i orqali real scan: boshlanish va tugash sanalari inclusive.
+- Auto scan har 1 minut.
+- Yangi natija topilsa browser notification + sahifa refresh.
+- CSV Excel-friendly va XLSX export.
 
-- Har 1 minut avtomatik scan
-- “Real tekshirish” bosilganda oxirgi 2 kunlik postlarni tekshiradi
-- Kalit so‘z yoki kalit gap 2 va undan ko‘p uchrasa bazaga yozadi
-- Bitta xabarda bir nechta keyword/gap mos kelsa, har biri alohida saqlanadi
-- PostgreSQL support
-- Browser notification
-- Telegram bot alert
-- Grafiklar
-- Keyword analytics
-- Channel analytics
-- AI classification
-- Sentiment analysis
-- CSV export
-
-## Render Start Command
-
-```bash
-uvicorn app:app --host 0.0.0.0 --port $PORT
-```
-
-## Render Build Command
-
-```bash
+Render:
+Build Command:
 pip install -r requirements.txt
-```
 
-## Render Environment Variables
-
-```env
-DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DB
-AUTO_SCAN_ENABLED=true
-SCAN_INTERVAL_SECONDS=60
-REAL_SCAN_DAYS=2
-TELEGRAM_BOT_TOKEN=
-TELEGRAM_ALERT_CHAT_ID=
-```
-
-`DATABASE_URL` bo‘lmasa SQLite ishlaydi.
+Start Command:
+uvicorn app:app --host 0.0.0.0 --port $PORT
