@@ -43,16 +43,18 @@ def dashboard(request:Request,msg:str=''):
     c=ctx(request,'dashboard',msg); c.update({'results':get_results(limit=10),'keyword_chart':chart('matched_keyword'),'source_chart':chart('source_username'),'daily_chart':daily()})
     return templates.TemplateResponse('dashboard.html',c)
 @app.get('/sources',response_class=HTMLResponse)
-def sources_page(request:Request,msg:str=''):
-    sources=get_sources(); c=ctx(request,'sources',msg); c.update({'sources':sources,'source_counts':{s.username:cnt_source(s.username) for s in sources}})
+def sources_page(request:Request,msg:str='', edit_id:int=0):
+    sources=get_sources(); edit_source=get_source_by_id(edit_id) if edit_id else None
+    c=ctx(request,'sources',msg); c.update({'sources':sources,'edit_source':edit_source,'source_counts':{s.username:cnt_source(s.username) for s in sources}})
     return templates.TemplateResponse('sources.html',c)
 @app.get('/autoscan',response_class=HTMLResponse)
 def autoscan_page(request:Request,msg:str=''):
     c=ctx(request,'autoscan',msg); c.update({'scan_history':scan_history()})
     return templates.TemplateResponse('autoscan.html',c)
 @app.get('/keywords',response_class=HTMLResponse)
-def keywords_page(request:Request,msg:str=''):
-    keywords=get_keywords(); c=ctx(request,'keywords',msg); c.update({'keywords':keywords,'keyword_counts':{k.keyword:cnt_keyword(k.keyword) for k in keywords}})
+def keywords_page(request:Request,msg:str='', edit_id:int=0):
+    keywords=get_keywords(); edit_keyword=get_keyword_by_id(edit_id) if edit_id else None
+    c=ctx(request,'keywords',msg); c.update({'keywords':keywords,'edit_keyword':edit_keyword,'keyword_counts':{k.keyword:cnt_keyword(k.keyword) for k in keywords}})
     return templates.TemplateResponse('keywords.html',c)
 @app.get('/analytics',response_class=HTMLResponse)
 def analytics_page(request:Request,msg:str=''):
@@ -71,9 +73,21 @@ def create_source(platform:str=Form('telegram'),link:str=Form(...),language:str=
         return RedirectResponse('/sources?msg=Source qo‘shildi',303)
     except Exception as e:
         return RedirectResponse(f'/sources?msg=Xatolik: {str(e)}',303)
+@app.post('/sources/{i}/update')
+def update_source_route(i:int, platform:str=Form('telegram'), link:str=Form(...), language:str=Form('UZ'), category:str=Form('')):
+    try:
+        username,clean,_=normalize_source_link(platform,link); update_source(i,platform.lower(),clean,username,language.upper(),category or None)
+        return RedirectResponse('/sources?msg=Source yangilandi',303)
+    except Exception as e:
+        return RedirectResponse(f'/sources?msg=Xatolik: {str(e)}',303)
+
 @app.post('/keywords')
 def create_keyword(keyword:str=Form(...),user_category:str=Form(''),priority:str=Form('MEDIUM')):
     add_keyword(keyword,user_category or None,priority.upper()); return RedirectResponse('/keywords?msg=Kalit so‘z/gap qo‘shildi',303)
+@app.post('/keywords/{i}/update')
+def update_keyword_route(i:int, keyword:str=Form(...), user_category:str=Form(''), priority:str=Form('MEDIUM')):
+    update_keyword(i,keyword,user_category or None,priority.upper()); return RedirectResponse('/keywords?msg=Keyword yangilandi',303)
+
 @app.post('/scan')
 def scan_now(date_from:str=Form(''),date_to:str=Form('')):
     r=run_scan('manual',date_from or None,date_to or None); period=f'{date_from} dan {date_to} gacha' if date_from and date_to else f'oxirgi {REAL_SCAN_DAYS} kun'
