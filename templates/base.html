@@ -55,4 +55,4 @@ function setQuickRange(prefix,days){const end=new Date(),start=new Date();start.
 function clearDateRange(prefix){document.getElementById(prefix+"FromText").value="";document.getElementById(prefix+"FromValue").value="";document.getElementById(prefix+"ToText").value="";document.getElementById(prefix+"ToValue").value="";closePickers()}
 document.addEventListener("click",function(e){const trigger=e.target.closest("[data-datepicker-key]");if(trigger){e.preventDefault();openCustomPicker(trigger.getAttribute("data-datepicker-key"));return}if(!e.target.closest(".custom-date-wrap")) closePickers()});
 </script>
-{% block scripts %}{% endblock %}</body></html>
+<script src="/static/calendar.js"></script>{% block scripts %}{% endblock %}</body></html>
