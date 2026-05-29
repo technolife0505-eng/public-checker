@@ -1,11 +1,14 @@
-# Media Monitoring Platform v4.5 — Calendar JS Fixed
+# Media Monitoring Platform v4.6 — Bulk Import
 
-Tuzatildi:
-- calendar.js SyntaxError tuzatildi
-- inline JS stringlar olib tashlandi
-- data-* event orqali ishlaydi
-- openCustomPicker endi aniqlanadi
-- Dashboard va Auto Scan calendar ochiladi
+Qo‘shildi:
+- Sources: bir nechta linkni birdan qo‘shish
+- Keywords: bir nechta keyword/gapni birdan qo‘shish
+- Sources TXT/CSV import
+- Keywords TXT/CSV import
+- Bazada oldin mavjud bo‘lsa avtomatik o‘tkazib yuboradi
+- Import ichida takror bo‘lsa avtomatik o‘tkazib yuboradi
+- Edit / Pause / Resume / Delete
+- Calendar fix saqlangan
 
 Render:
 Build Command: pip install -r requirements.txt

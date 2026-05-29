@@ -1,5 +1,5 @@
 import csv, io
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, UploadFile, File
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -45,16 +45,22 @@ def dashboard(request:Request,msg:str=''):
     c=ctx(request,'dashboard',msg); c.update({'results':get_results(limit=10),'keyword_chart':chart('matched_keyword'),'source_chart':chart('source_username'),'daily_chart':daily()})
     return templates.TemplateResponse('dashboard.html',c)
 @app.get('/sources',response_class=HTMLResponse)
-def sources_page(request:Request,msg:str=''):
-    sources=get_sources(); c=ctx(request,'sources',msg); c.update({'sources':sources,'source_counts':{s.username:cnt_source(s.username) for s in sources}})
+def sources_page(request:Request,msg:str='',edit_id:int=0):
+    sources=get_sources()
+    edit_source=get_source_by_id(edit_id) if edit_id else None
+    c=ctx(request,'sources',msg)
+    c.update({'sources':sources,'edit_source':edit_source,'source_counts':{s.username:cnt_source(s.username) for s in sources}})
     return templates.TemplateResponse('sources.html',c)
 @app.get('/autoscan',response_class=HTMLResponse)
 def autoscan_page(request:Request,msg:str=''):
     c=ctx(request,'autoscan',msg); c.update({'scan_history':scan_history()})
     return templates.TemplateResponse('autoscan.html',c)
 @app.get('/keywords',response_class=HTMLResponse)
-def keywords_page(request:Request,msg:str=''):
-    keywords=get_keywords(); c=ctx(request,'keywords',msg); c.update({'keywords':keywords,'keyword_counts':{k.keyword:cnt_keyword(k.keyword) for k in keywords}})
+def keywords_page(request:Request,msg:str='',edit_id:int=0):
+    keywords=get_keywords()
+    edit_keyword=get_keyword_by_id(edit_id) if edit_id else None
+    c=ctx(request,'keywords',msg)
+    c.update({'keywords':keywords,'edit_keyword':edit_keyword,'keyword_counts':{k.keyword:cnt_keyword(k.keyword) for k in keywords}})
     return templates.TemplateResponse('keywords.html',c)
 @app.get('/analytics',response_class=HTMLResponse)
 def analytics_page(request:Request,msg:str=''):
@@ -66,16 +72,94 @@ def results_page(request:Request,q:str='',keyword:str='',source:str='',platform:
     return templates.TemplateResponse('results.html',c)
 @app.get('/api/live')
 def live(): return {'stats':stats()}
+
+def split_bulk_text(text):
+    if not text:
+        return []
+    out=[]
+    for part in str(text).replace(',', '\n').replace(';', '\n').splitlines():
+        val=part.strip()
+        if val:
+            out.append(val)
+    return out
+
+def bulk_add_sources(platform, links_text, language, category):
+    total=added=skipped=errors=0
+    seen=set()
+    for raw in split_bulk_text(links_text):
+        total+=1
+        try:
+            username,clean,_=normalize_source_link(platform,raw)
+            key=(platform.lower(),clean.lower().rstrip('/'),username.lower())
+            if key in seen:
+                skipped+=1
+                continue
+            seen.add(key)
+            if source_exists(platform.lower(),clean,username):
+                skipped+=1
+                continue
+            add_source(platform.lower(),clean,username,language.upper(),category or None)
+            added+=1
+        except Exception:
+            errors+=1
+    return total,added,skipped,errors
+
+def bulk_add_keywords(keywords_text, user_category, priority):
+    total=added=skipped=errors=0
+    seen=set()
+    for raw in split_bulk_text(keywords_text):
+        total+=1
+        val=raw.lower().strip()
+        if not val:
+            errors+=1
+            continue
+        if val in seen:
+            skipped+=1
+            continue
+        seen.add(val)
+        if keyword_exists(val):
+            skipped+=1
+            continue
+        add_keyword(val,user_category or None,priority.upper())
+        added+=1
+    return total,added,skipped,errors
+
 @app.post('/sources')
-def create_source(platform:str=Form('telegram'),link:str=Form(...),language:str=Form('UZ'),category:str=Form('')):
+def create_source(platform:str=Form('telegram'),links:str=Form(...),language:str=Form('UZ'),category:str=Form('')):
+    total,added,skipped,errors=bulk_add_sources(platform,links,language,category)
+    return RedirectResponse(f'/sources?msg=Sources: jami {total}, yangi {added}, mavjud/takror {skipped}, xato {errors}',303)
+
+@app.post('/sources/import')
+async def import_sources(platform:str=Form('telegram'),language:str=Form('UZ'),category:str=Form(''),file:UploadFile=File(...)):
+    content=(await file.read()).decode('utf-8',errors='ignore')
+    total,added,skipped,errors=bulk_add_sources(platform,content,language,category)
+    return RedirectResponse(f'/sources?msg=TXT import: jami {total}, yangi {added}, mavjud/takror {skipped}, xato {errors}',303)
+
+@app.post('/sources/{i}/update')
+def update_source_route(i:int, platform:str=Form('telegram'), link:str=Form(...), language:str=Form('UZ'), category:str=Form('')):
     try:
-        username,clean,_=normalize_source_link(platform,link); add_source(platform.lower(),clean,username,language.upper(),category or None)
-        return RedirectResponse('/sources?msg=Source qo‘shildi',303)
+        username,clean,_=normalize_source_link(platform,link)
+        update_source(i,platform.lower(),clean,username,language.upper(),category or None)
+        return RedirectResponse('/sources?msg=Source yangilandi',303)
     except Exception as e:
         return RedirectResponse(f'/sources?msg=Xatolik: {str(e)}',303)
+
 @app.post('/keywords')
-def create_keyword(keyword:str=Form(...),user_category:str=Form(''),priority:str=Form('MEDIUM')):
-    add_keyword(keyword,user_category or None,priority.upper()); return RedirectResponse('/keywords?msg=Kalit so‘z/gap qo‘shildi',303)
+def create_keyword(keywords:str=Form(...),user_category:str=Form(''),priority:str=Form('MEDIUM')):
+    total,added,skipped,errors=bulk_add_keywords(keywords,user_category,priority)
+    return RedirectResponse(f'/keywords?msg=Keywords: jami {total}, yangi {added}, mavjud/takror {skipped}, xato {errors}',303)
+
+@app.post('/keywords/import')
+async def import_keywords(user_category:str=Form(''),priority:str=Form('MEDIUM'),file:UploadFile=File(...)):
+    content=(await file.read()).decode('utf-8',errors='ignore')
+    total,added,skipped,errors=bulk_add_keywords(content,user_category,priority)
+    return RedirectResponse(f'/keywords?msg=TXT import: jami {total}, yangi {added}, mavjud/takror {skipped}, xato {errors}',303)
+
+@app.post('/keywords/{i}/update')
+def update_keyword_route(i:int, keyword:str=Form(...), user_category:str=Form(''), priority:str=Form('MEDIUM')):
+    update_keyword(i,keyword,user_category or None,priority.upper())
+    return RedirectResponse('/keywords?msg=Keyword yangilandi',303)
+
 @app.post('/scan')
 def scan_now(date_from:str=Form(''),date_to:str=Form('')):
     r=run_scan('manual',date_from or None,date_to or None); period=f'{date_from} dan {date_to} gacha' if date_from and date_to else f'oxirgi {REAL_SCAN_DAYS} kun'

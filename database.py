@@ -184,3 +184,62 @@ def del_keyword(i):
         row=s.query(Keyword).filter(Keyword.id==i).first()
         if row: s.delete(row); s.commit()
     finally: s.close()
+
+
+def get_source_by_id(i):
+    s=db()
+    try:
+        return s.query(Source).filter(Source.id==i).first()
+    finally:
+        s.close()
+
+def get_keyword_by_id(i):
+    s=db()
+    try:
+        return s.query(Keyword).filter(Keyword.id==i).first()
+    finally:
+        s.close()
+
+def source_exists(platform, link, username):
+    s=db()
+    try:
+        return s.query(Source).filter(
+            ((Source.platform==platform) & (Source.link==link)) |
+            ((Source.platform==platform) & (Source.username==username))
+        ).first() is not None
+    finally:
+        s.close()
+
+def keyword_exists(keyword):
+    s=db()
+    try:
+        val=(keyword or '').lower().strip()
+        return s.query(Keyword).filter(Keyword.keyword==val).first() is not None
+    finally:
+        s.close()
+
+def update_source(i, platform, link, username, language='UZ', category=None):
+    s=db()
+    try:
+        row=s.query(Source).filter(Source.id==i).first()
+        if row:
+            row.platform=platform
+            row.link=link
+            row.username=username
+            row.language=language
+            row.category=category
+            s.commit()
+    finally:
+        s.close()
+
+def update_keyword(i, keyword, user_category=None, priority='MEDIUM'):
+    s=db()
+    try:
+        row=s.query(Keyword).filter(Keyword.id==i).first()
+        if row:
+            row.keyword=(keyword or '').lower().strip()
+            row.user_category=user_category
+            row.priority=priority
+            s.commit()
+    finally:
+        s.close()
