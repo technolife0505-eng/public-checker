@@ -1,18 +1,10 @@
-# Media Monitoring Platform v4.2 — Custom Uzbek Datepicker
+# Media Monitoring Platform v4.4 — Calendar Fix
 
-Separate pages:
-- /dashboard
-- /sources
-- /autoscan
-- /keywords
-- /analytics
-- /results
-
-v4.2:
-- Browser ruscha date input o‘rniga custom Uzbek dark datepicker.
-- Ko‘rinish: kun.oy.yil
-- Backendga hidden yyyy-mm-dd yuboriladi.
-- Oxirgi 1/7/30 kun quick buttons.
+Tuzatildi:
+- calendar.js alohida static faylga chiqarildi
+- input va icon bosilganda openCustomPicker() to‘g‘ridan-to‘g‘ri ishlaydi
+- Dashboard va Auto Scan sahifasida custom Uzbek calendar ochiladi
+- browser ruscha datepicker ishlatilmaydi
 
 Render:
 Build Command: pip install -r requirements.txt

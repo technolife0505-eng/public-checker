@@ -2,6 +2,7 @@ import csv, io
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from apscheduler.schedulers.background import BackgroundScheduler
 from openpyxl import Workbook
 from config import AUTO_SCAN_ENABLED, SCAN_INTERVAL_SECONDS, REAL_SCAN_DAYS
@@ -11,6 +12,7 @@ from notifications import notify_pending
 
 app=FastAPI(title='Media Monitoring Platform v4')
 templates=Jinja2Templates(directory='templates')
+app.mount('/static', StaticFiles(directory='static'), name='static')
 scheduler=BackgroundScheduler()
 
 def run_scan(scan_type='auto',date_from=None,date_to=None):
