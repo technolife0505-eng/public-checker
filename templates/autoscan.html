@@ -1,3 +1,113 @@
-{% extends "base.html" %}{% block title %}Auto Scan{% endblock %}{% block subtitle %}Auto scan status, qo‘lda real tekshirish va tarix.{% endblock %}{% block content %}
-<section class="card section"><h3>Real tekshirish — sana oralig‘i inclusive</h3><form method="post" action="/scan" class="scan-grid"><div class="date-field"><label class="date-label">Boshlanish sanasi</label><input type="date" name="date_from"></div><div class="date-field"><label class="date-label">Tugash sanasi</label><input type="date" name="date_to"></div><div class="date-field"><label class="date-label">&nbsp;</label><button class="scan-btn" type="submit">Real tekshirishni boshlash</button></div></form><p style="color:#94a3b8">Sana tanlanmasa oxirgi {{ days }} kun tekshiriladi. Auto scan har {{ interval }} sekundda ishlaydi.</p></section>
-<section class="card"><h3>Scan History</h3><div class="table-wrap"><table><thead><tr><th>Type</th><th>Started</th><th>Finished</th><th>Matched</th><th>Saved</th><th>Status</th><th>Note</th></tr></thead><tbody>{% for h in scan_history %}<tr><td>{{ h.scan_type }}</td><td>{{ h.started_at }}</td><td>{{ h.finished_at }}</td><td>{{ h.matched_count }}</td><td>{{ h.saved_count }}</td><td>{{ h.status }}</td><td>{{ h.note or '-' }}</td></tr>{% else %}<tr><td colspan="7">Hali scan history yo‘q.</td></tr>{% endfor %}</tbody></table></div></section>{% endblock %}
+{% extends "base.html" %}
+{% block title %}Auto Scan{% endblock %}
+{% block subtitle %}Auto scan status, qo‘lda real tekshirish va tarix.{% endblock %}
+{% block content %}
+<section class="card section">
+<h3>Real tekshirish — sana oralig‘i inclusive</h3>
+
+<form method="post" action="/scan" class="scan-grid" id="scanForm">
+<div class="custom-date-wrap">
+<label class="date-label">Boshlanish sanasi</label>
+<input type="text" class="custom-date-input" id="dateFromText" placeholder="kun.oy.yil" readonly>
+<input type="hidden" name="date_from" id="dateFromValue">
+<button type="button" class="calendar-icon-btn">📅</button>
+<div class="datepicker-popup" id="pickerFrom"></div>
+</div>
+
+<div class="custom-date-wrap">
+<label class="date-label">Tugash sanasi</label>
+<input type="text" class="custom-date-input" id="dateToText" placeholder="kun.oy.yil" readonly>
+<input type="hidden" name="date_to" id="dateToValue">
+<button type="button" class="calendar-icon-btn">📅</button>
+<div class="datepicker-popup" id="pickerTo"></div>
+</div>
+
+<div class="custom-date-wrap">
+<label class="date-label">&nbsp;</label>
+<button class="scan-btn" type="submit">Real tekshirishni boshlash</button>
+</div>
+</form>
+
+<div class="quick-dates">
+<button type="button" onclick="setQuickRange(1)">Oxirgi 1 kun</button>
+<button type="button" onclick="setQuickRange(7)">Oxirgi 7 kun</button>
+<button type="button" onclick="setQuickRange(30)">Oxirgi 30 kun</button>
+<button type="button" onclick="clearDates()">Tozalash</button>
+</div>
+
+<p style="color:#94a3b8">Sana tanlanmasa oxirgi {{ days }} kun tekshiriladi. Tanlangan boshlanish va tugash sanalari ham qidiruvga kiradi.</p>
+</section>
+
+<section class="card">
+<h3>Scan History</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Type</th><th>Started</th><th>Finished</th><th>Matched</th><th>Saved</th><th>Status</th><th>Note</th></tr></thead>
+<tbody>
+{% for h in scan_history %}
+<tr><td>{{ h.scan_type }}</td><td>{{ h.started_at }}</td><td>{{ h.finished_at }}</td><td>{{ h.matched_count }}</td><td>{{ h.saved_count }}</td><td>{{ h.status }}</td><td>{{ h.note or '-' }}</td></tr>
+{% else %}
+<tr><td colspan="7">Hali scan history yo‘q.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const uzMonths=["Yanvar","Fevral","Mart","Aprel","May","Iyun","Iyul","Avgust","Sentabr","Oktabr","Noyabr","Dekabr"];
+const uzWeek=["Du","Se","Ch","Pa","Ju","Sh","Ya"];
+let dpState={from:new Date(),to:new Date()};
+
+function pad(n){return String(n).padStart(2,"0")}
+function toISO(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+function toDisplay(d){return pad(d.getDate())+"."+pad(d.getMonth()+1)+"."+d.getFullYear()}
+
+function closePickers(){
+  document.getElementById("pickerFrom").classList.remove("open");
+  document.getElementById("pickerTo").classList.remove("open");
+}
+function setDate(kind,d){
+  const text=document.getElementById(kind==="from"?"dateFromText":"dateToText");
+  const value=document.getElementById(kind==="from"?"dateFromValue":"dateToValue");
+  text.value=toDisplay(d); value.value=toISO(d); closePickers();
+}
+function renderPicker(kind){
+  const popup=document.getElementById(kind==="from"?"pickerFrom":"pickerTo");
+  const current=dpState[kind], year=current.getFullYear(), month=current.getMonth();
+  const first=new Date(year,month,1), startOffset=(first.getDay()+6)%7;
+  const daysInMonth=new Date(year,month+1,0).getDate(), prevDays=new Date(year,month,0).getDate();
+  const selected=document.getElementById(kind==="from"?"dateFromValue":"dateToValue").value;
+  const todayISO=toISO(new Date());
+  let html='<div class="dp-head"><button type="button" class="dp-nav" onclick="moveMonth(\\''+kind+'\\',-1)">‹</button><div class="dp-title">'+uzMonths[month]+' '+year+'</div><button type="button" class="dp-nav" onclick="moveMonth(\\''+kind+'\\',1)">›</button></div>';
+  html+='<div class="dp-week">'+uzWeek.map(w=>'<span>'+w+'</span>').join('')+'</div><div class="dp-grid">';
+  for(let i=0;i<42;i++){
+    let dayNum,d,muted=false;
+    if(i<startOffset){dayNum=prevDays-startOffset+i+1; d=new Date(year,month-1,dayNum); muted=true}
+    else if(i>=startOffset+daysInMonth){dayNum=i-startOffset-daysInMonth+1; d=new Date(year,month+1,dayNum); muted=true}
+    else{dayNum=i-startOffset+1; d=new Date(year,month,dayNum)}
+    const iso=toISO(d);
+    html+='<button type="button" class="dp-day '+(muted?'muted ':'')+(todayISO===iso?'today ':'')+(selected===iso?'selected':'')+'" onclick="setDate(\\''+kind+'\\',new Date('+d.getFullYear()+','+d.getMonth()+','+d.getDate()+'))">'+dayNum+'</button>';
+  }
+  html+='</div>'; popup.innerHTML=html;
+}
+function openPicker(kind){closePickers(); renderPicker(kind); document.getElementById(kind==="from"?"pickerFrom":"pickerTo").classList.add("open")}
+function moveMonth(kind,delta){dpState[kind]=new Date(dpState[kind].getFullYear(),dpState[kind].getMonth()+delta,1); renderPicker(kind)}
+document.querySelectorAll(".calendar-icon-btn,.custom-date-input").forEach(el=>{
+  el.addEventListener("click",function(){
+    const hidden=this.closest(".custom-date-wrap").querySelector("input[type=hidden]");
+    openPicker(hidden.id==="dateFromValue"?"from":"to");
+  })
+});
+document.addEventListener("click",e=>{if(!e.target.closest(".custom-date-wrap")) closePickers()});
+function setQuickRange(days){
+  const end=new Date(), start=new Date(); start.setDate(end.getDate()-(days-1));
+  setDate("from",start); setDate("to",end);
+}
+function clearDates(){
+  dateFromText.value=""; dateFromValue.value=""; dateToText.value=""; dateToValue.value=""; closePickers();
+}
+</script>
+{% endblock %}
