@@ -1,10 +1,11 @@
-# Media Monitoring Platform v4.4 — Calendar Fix
+# Media Monitoring Platform v4.5 — Calendar JS Fixed
 
 Tuzatildi:
-- calendar.js alohida static faylga chiqarildi
-- input va icon bosilganda openCustomPicker() to‘g‘ridan-to‘g‘ri ishlaydi
-- Dashboard va Auto Scan sahifasida custom Uzbek calendar ochiladi
-- browser ruscha datepicker ishlatilmaydi
+- calendar.js SyntaxError tuzatildi
+- inline JS stringlar olib tashlandi
+- data-* event orqali ishlaydi
+- openCustomPicker endi aniqlanadi
+- Dashboard va Auto Scan calendar ochiladi
 
 Render:
 Build Command: pip install -r requirements.txt
