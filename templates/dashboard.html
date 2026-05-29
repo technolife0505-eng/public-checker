@@ -1,5 +1,74 @@
-{% extends "base.html" %}{% block title %}Dashboard{% endblock %}{% block subtitle %}Umumiy monitoring ko‘rsatkichlari va oxirgi natijalar.{% endblock %}{% block content %}
-<section class="stats section"><div class="card"><div class="stat-label">Topilgan xabarlar</div><div class="stat-value">{{ stats.total_results }}</div></div><div class="card"><div class="stat-label">Bugungi natija</div><div class="stat-value">{{ stats.today_results }}</div></div><div class="card"><div class="stat-label">Sources</div><div class="stat-value">{{ stats.total_sources }}</div></div><div class="card"><div class="stat-label">Keywords</div><div class="stat-value">{{ stats.total_keywords }}</div></div><div class="card"><div class="stat-label">Risk/Negative</div><div class="stat-value">{{ stats.risk_results }}</div></div></section>
-<section class="grid3 section"><div class="card"><h3>Daily trend</h3><canvas id="dailyChart"></canvas></div><div class="card"><h3>Top keywords</h3><canvas id="keywordChart"></canvas></div><div class="card"><h3>Top sources</h3><canvas id="sourceChart"></canvas></div></section>
-<section class="card"><h3>Oxirgi topilgan xabarlar</h3><div class="table-wrap"><table><thead><tr><th>Time</th><th>Platform</th><th>Source</th><th>Keyword</th><th>AI class</th><th>Sentiment</th><th>Text</th><th>Link</th></tr></thead><tbody>{% for r in results %}<tr><td>{{ r.message_time }}</td><td>{{ r.platform }}</td><td>{{ r.source_username }}</td><td>{{ r.matched_keyword }}</td><td><span class="badge">{{ r.ai_classification }}</span></td><td><span class="badge {{ r.sentiment }}">{{ r.sentiment }}</span></td><td class="text">{{ r.message_text }}</td><td><a href="{{ r.message_url }}" target="_blank">Open</a></td></tr>{% else %}<tr><td colspan="8">Hali natija yo‘q.</td></tr>{% endfor %}</tbody></table></div></section>{% endblock %}
-{% block scripts %}<script>const dailyData={{ daily_chart|tojson }},keywordData={{ keyword_chart|tojson }},sourceData={{ source_chart|tojson }};function bar(id,l,v){new Chart(document.getElementById(id),{type:'bar',data:{labels:l,datasets:[{label:'Soni',data:v}]},options:{responsive:true,plugins:{legend:{display:false}}}})}function line(id,l,v){new Chart(document.getElementById(id),{type:'line',data:{labels:l,datasets:[{label:'Soni',data:v,tension:.35}]},options:{responsive:true,plugins:{legend:{display:false}}}})}line('dailyChart',dailyData.map(x=>x.date),dailyData.map(x=>x.count));bar('keywordChart',keywordData.map(x=>x.name),keywordData.map(x=>x.count));bar('sourceChart',sourceData.map(x=>x.name),sourceData.map(x=>x.count));</script>{% endblock %}
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block subtitle %}Umumiy monitoring ko‘rsatkichlari va oxirgi natijalar.{% endblock %}
+{% block content %}
+<section class="stats section">
+<div class="card"><div class="stat-label">Topilgan xabarlar</div><div class="stat-value">{{ stats.total_results }}</div></div>
+<div class="card"><div class="stat-label">Bugungi natija</div><div class="stat-value">{{ stats.today_results }}</div></div>
+<div class="card"><div class="stat-label">Sources</div><div class="stat-value">{{ stats.total_sources }}</div></div>
+<div class="card"><div class="stat-label">Keywords</div><div class="stat-value">{{ stats.total_keywords }}</div></div>
+<div class="card"><div class="stat-label">Risk/Negative</div><div class="stat-value">{{ stats.risk_results }}</div></div>
+</section>
+
+<section class="card section">
+<h3>Real tekshirish — sana oralig‘i inclusive</h3>
+<form method="post" action="/scan" class="scan-grid">
+<div class="custom-date-wrap">
+<label class="date-label">Boshlanish sanasi</label>
+<input type="text" class="custom-date-input" id="mainFromText" placeholder="kun.oy.yil" readonly data-datepicker-key="mainFrom">
+<input type="hidden" name="date_from" id="mainFromValue">
+<button type="button" class="calendar-icon-btn" data-datepicker-key="mainFrom">📅</button>
+<div class="datepicker-popup" id="mainFromPicker"></div>
+</div>
+<div class="custom-date-wrap">
+<label class="date-label">Tugash sanasi</label>
+<input type="text" class="custom-date-input" id="mainToText" placeholder="kun.oy.yil" readonly data-datepicker-key="mainTo">
+<input type="hidden" name="date_to" id="mainToValue">
+<button type="button" class="calendar-icon-btn" data-datepicker-key="mainTo">📅</button>
+<div class="datepicker-popup" id="mainToPicker"></div>
+</div>
+<div class="custom-date-wrap">
+<label class="date-label">&nbsp;</label>
+<button class="scan-btn" type="submit">Real tekshirishni boshlash</button>
+</div>
+</form>
+<div class="quick-dates">
+<button type="button" onclick="setQuickRange('main',1)">Oxirgi 1 kun</button>
+<button type="button" onclick="setQuickRange('main',7)">Oxirgi 7 kun</button>
+<button type="button" onclick="setQuickRange('main',30)">Oxirgi 30 kun</button>
+<button type="button" onclick="clearDateRange('main')">Tozalash</button>
+</div>
+<p style="color:#94a3b8">Sana tanlanmasa oxirgi {{ days }} kun tekshiriladi. Tanlangan boshlanish va tugash sanalari ham qidiruvga kiradi.</p>
+</section>
+
+<section class="grid3 section">
+<div class="card"><h3>Daily trend</h3><canvas id="dailyChart"></canvas></div>
+<div class="card"><h3>Top keywords</h3><canvas id="keywordChart"></canvas></div>
+<div class="card"><h3>Top sources</h3><canvas id="sourceChart"></canvas></div>
+</section>
+<section class="card">
+<h3>Oxirgi topilgan xabarlar</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Time</th><th>Platform</th><th>Source</th><th>Keyword</th><th>AI class</th><th>Sentiment</th><th>Text</th><th>Link</th></tr></thead>
+<tbody>
+{% for r in results %}
+<tr><td>{{ r.message_time }}</td><td>{{ r.platform }}</td><td>{{ r.source_username }}</td><td>{{ r.matched_keyword }}</td><td><span class="badge">{{ r.ai_classification }}</span></td><td><span class="badge {{ r.sentiment }}">{{ r.sentiment }}</span></td><td class="text">{{ r.message_text }}</td><td><a href="{{ r.message_url }}" target="_blank">Open</a></td></tr>
+{% else %}
+<tr><td colspan="8">Hali natija yo‘q.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+const dailyData={{ daily_chart|tojson }},keywordData={{ keyword_chart|tojson }},sourceData={{ source_chart|tojson }};
+function bar(id,l,v){new Chart(document.getElementById(id),{type:'bar',data:{labels:l,datasets:[{label:'Soni',data:v}]},options:{responsive:true,plugins:{legend:{display:false}}}})}
+function line(id,l,v){new Chart(document.getElementById(id),{type:'line',data:{labels:l,datasets:[{label:'Soni',data:v,tension:.35}]},options:{responsive:true,plugins:{legend:{display:false}}}})}
+line('dailyChart',dailyData.map(x=>x.date),dailyData.map(x=>x.count));
+bar('keywordChart',keywordData.map(x=>x.name),keywordData.map(x=>x.count));
+bar('sourceChart',sourceData.map(x=>x.name),sourceData.map(x=>x.count));
+</script>
+{% endblock %}
