@@ -20,7 +20,51 @@
 .quick-dates{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .quick-dates button{padding:8px 10px;border-radius:10px;background:#334155;color:#e5e7eb;font-size:12px}
 canvas{max-height:260px}@media(max-width:1200px){.layout{grid-template-columns:1fr}.sidebar{display:none}.stats,.grid3,.toolbar,.form-grid,.form-grid-key,.scan-grid{grid-template-columns:1fr}}
-</style></head><body><div class="layout"><aside class="sidebar"><div class="logo">AI</div><h1>Media Monitoring Platform</h1><p>Telegram real ishlaydi. Multi-platform tayyor.</p><div class="nav"><a href="/dashboard" class="{% if active_page=='dashboard' %}active{% endif %}">Dashboard</a><a href="/sources" class="{% if active_page=='sources' %}active{% endif %}">Sources</a><a href="/autoscan" class="{% if active_page=='autoscan' %}active{% endif %}">Auto Scan</a><a href="/keywords" class="{% if active_page=='keywords' %}active{% endif %}">Keywords / Gaplar</a><a href="/analytics" class="{% if active_page=='analytics' %}active{% endif %}">Analytics</a><a href="/results" class="{% if active_page=='results' %}active{% endif %}">Results</a></div></aside><main class="main"><div class="top"><div><h2>{% block title %}{% endblock %}</h2><p>{% block subtitle %}{% endblock %}</p></div><div class="live">● AUTO SCAN {{ interval }}s</div></div>{% if msg %}<div class="msgbox">{{ msg }}</div>{% endif %}{% block content %}{% endblock %}</main></div><script>if("Notification" in window&&Notification.permission!=="granted"){Notification.requestPermission()}let lastCount={{ stats.total_results }};setInterval(async()=>{try{const r=await fetch('/api/live?ts='+Date.now());const d=await r.json();const current=d.stats.total_results||0;if(current>lastCount){if("Notification" in window&&Notification.permission==="granted"){new Notification("Yangi monitoring natijasi",{body:"Yangi mos xabar topildi. Sahifa yangilanmoqda..."})}setTimeout(()=>window.location.reload(),1200)}lastCount=current}catch(e){}},15000);</script>
+
+/* v4.8 Dashboard recent messages scroll */
+.recent-scroll{
+    max-height: 620px;
+    overflow-y: auto;
+    overflow-x: auto;
+    border-radius: 14px;
+}
+.recent-scroll table{
+    min-width: 1100px;
+}
+.recent-scroll td{
+    vertical-align: top;
+}
+.recent-scroll td:nth-child(7){
+    max-width: 560px;
+    white-space: normal;
+    line-height: 1.6;
+}
+.recent-scroll::-webkit-scrollbar{
+    width: 10px;
+    height: 10px;
+}
+.recent-scroll::-webkit-scrollbar-thumb{
+    background: rgba(148,163,184,.65);
+    border-radius: 10px;
+}
+.muted{
+    color: #9fb3d1;
+    margin: 6px 0 16px 0;
+}
+
+
+.notice{background:#0f2b4d;border:1px solid rgba(96,165,250,.35);color:#dbeafe;padding:14px 18px;border-radius:14px;margin-bottom:18px}
+.danger-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.danger-box{background:rgba(15,23,42,.75);border:1px solid rgba(148,163,184,.22);border-radius:18px;padding:20px}
+.danger-box h4{margin:0 0 10px 0;color:#fff}
+.danger-box p{color:#9fb3d1;min-height:48px}
+.danger-box input{width:100%;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#020617;color:white;margin-bottom:12px}
+button.danger,.danger-box .danger{background:#ef4444!important;color:white!important;border:none;border-radius:12px;padding:12px 18px;font-weight:800;cursor:pointer}
+.factory{border-color:rgba(239,68,68,.55);box-shadow:0 0 0 1px rgba(239,68,68,.16) inset}
+@media(max-width:900px){.danger-grid{grid-template-columns:1fr}}
+
+</style></head><body><div class="layout"><aside class="sidebar"><div class="logo">AI</div><h1>Media Monitoring Platform</h1><p>Telegram real ishlaydi. Multi-platform tayyor.</p><div class="nav"><a href="/dashboard" class="{% if active_page=='dashboard' %}active{% endif %}">Dashboard</a><a href="/sources" class="{% if active_page=='sources' %}active{% endif %}">Sources</a><a href="/autoscan" class="{% if active_page=='autoscan' %}active{% endif %}">Auto Scan</a><a href="/keywords" class="{% if active_page=='keywords' %}active{% endif %}">Keywords / Gaplar</a><a href="/analytics" class="{% if active_page=='analytics' %}active{% endif %}">Analytics</a><a href="/results" class="{% if active_page=='results' %}active{% endif %}">Results</a></div><a class="nav {% if active_page=='settings' %}active{% endif %}" href="/settings">Settings</a>
+</aside><main class="main"><div class="top"><div><h2>{% block title %}{% endblock %}</h2><p>{% block subtitle %}{% endblock %}</p></div><div class="live">● AUTO SCAN {{ interval }}s</div></div>{% if msg %}<div class="msgbox">{{ msg }}</div>{% endif %}{% block content %}{% endblock %}</main></div><script>if("Notification" in window&&Notification.permission!=="granted"){Notification.requestPermission()}let lastCount={{ stats.total_results }};setInterval(async()=>{try{const r=await fetch('/api/live?ts='+Date.now());const d=await r.json();const current=d.stats.total_results||0;if(current>lastCount){if("Notification" in window&&Notification.permission==="granted"){new Notification("Yangi monitoring natijasi",{body:"Yangi mos xabar topildi. Sahifa yangilanmoqda..."})}setTimeout(()=>window.location.reload(),1200)}lastCount=current}catch(e){}},15000);</script>
 <script>
 const uzMonths=["Yanvar","Fevral","Mart","Aprel","May","Iyun","Iyul","Avgust","Sentabr","Oktabr","Noyabr","Dekabr"];
 const uzWeek=["Du","Se","Ch","Pa","Ju","Sh","Ya"];

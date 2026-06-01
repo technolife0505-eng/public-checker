@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block subtitle %}Database Management va xavfsiz tozalash paneli.{% endblock %}
+{% block content %}
+{% if msg %}<div class="notice">{{ msg }}</div>{% endif %}
+<section class="card section">
+  <h3>Database Management</h3>
+  <p class="muted">Test ma’lumotlarini 1 klikda tozalash. O‘chirilgan ma’lumot qaytarilmaydi.</p>
+  <div class="danger-grid">
+    <div class="danger-box">
+      <h4>Delete Results Only</h4>
+      <p>Faqat topilgan xabarlar va scan history o‘chadi. Sources va Keywords qoladi.</p>
+      <form method="post" action="/admin/clear-results" onsubmit="return confirm('Natijalarni o‘chirishni tasdiqlaysizmi?')">
+        <input name="confirm" placeholder="DELETE RESULTS deb yozing" required>
+        <button class="danger" type="submit">Delete Results</button>
+      </form>
+    </div>
+    <div class="danger-box">
+      <h4>Delete Sources Only</h4>
+      <p>Sources o‘chadi. Natijalar ham tozalanadi.</p>
+      <form method="post" action="/admin/clear-sources" onsubmit="return confirm('Sources va natijalarni o‘chirishni tasdiqlaysizmi?')">
+        <input name="confirm" placeholder="DELETE SOURCES deb yozing" required>
+        <button class="danger" type="submit">Delete Sources</button>
+      </form>
+    </div>
+    <div class="danger-box">
+      <h4>Delete Keywords Only</h4>
+      <p>Keywords o‘chadi. Natijalar ham tozalanadi.</p>
+      <form method="post" action="/admin/clear-keywords" onsubmit="return confirm('Keywords va natijalarni o‘chirishni tasdiqlaysizmi?')">
+        <input name="confirm" placeholder="DELETE KEYWORDS deb yozing" required>
+        <button class="danger" type="submit">Delete Keywords</button>
+      </form>
+    </div>
+    <div class="danger-box factory">
+      <h4>Factory Reset — Everything</h4>
+      <p>Sources, Keywords, Results va Scan history — hammasi 0 bo‘ladi.</p>
+      <form method="post" action="/admin/factory-reset" onsubmit="return confirm('DIQQAT! Barcha baza 0 bo‘ladi. Davom etasizmi?')">
+        <input name="confirm" placeholder="DELETE ALL deb yozing" required>
+        <button class="danger" type="submit">Factory Reset</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
