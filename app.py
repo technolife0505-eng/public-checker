@@ -1,6 +1,6 @@
 import csv, io
 from fastapi import FastAPI, Request, Form, UploadFile, File
-from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse, Response
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -30,6 +30,8 @@ def run_scan(scan_type='auto',date_from=None,date_to=None):
 
 @app.on_event('startup')
 def startup():
+    from config import DATABASE_URL
+    print('DATABASE_KIND=' + ('postgresql' if str(DATABASE_URL).startswith('postgres') else 'sqlite'))
     init_db()
     if AUTO_SCAN_ENABLED and not scheduler.running:
         scheduler.add_job(lambda: run_scan('auto'),'interval',seconds=SCAN_INTERVAL_SECONDS,id='auto_scan',replace_existing=True)
@@ -38,11 +40,20 @@ def startup():
 def ctx(request,active,msg=''):
     return {'request':request,'active_page':active,'stats':stats(),'interval':SCAN_INTERVAL_SECONDS,'days':REAL_SCAN_DAYS,'msg':msg}
 
-@app.get('/')
-def root(): return RedirectResponse('/dashboard')
+@app.api_route('/', methods=['GET','HEAD'])
+def root(): return Response(content='ok', media_type='text/plain', status_code=200)
+
+@app.api_route('/ping', methods=['GET','HEAD'])
+def ping():
+    return Response(content='ok', media_type='text/plain', status_code=200)
+
+@app.api_route('/health', methods=['GET','HEAD'])
+def health():
+    return Response(content='ok', media_type='text/plain', status_code=200)
+
 @app.get('/dashboard',response_class=HTMLResponse)
 def dashboard(request:Request,msg:str=''):
-    c=ctx(request,'dashboard',msg); c.update({'results':get_results(limit=10),'keyword_chart':chart('matched_keyword'),'source_chart':chart('source_username'),'daily_chart':daily()})
+    c=ctx(request,'dashboard',msg); c.update({'results':get_results(limit=100),'keyword_chart':chart('matched_keyword'),'source_chart':chart('source_username'),'daily_chart':daily()})
     return templates.TemplateResponse('dashboard.html',c)
 @app.get('/sources',response_class=HTMLResponse)
 def sources_page(request:Request,msg:str='',edit_id:int=0):
@@ -70,6 +81,12 @@ def analytics_page(request:Request,msg:str=''):
 def results_page(request:Request,q:str='',keyword:str='',source:str='',platform:str='',language:str='',sentiment:str='',msg:str=''):
     c=ctx(request,'results',msg); c.update({'sources':get_sources(),'keywords':get_keywords(),'results':get_results(q or None,keyword or None,source or None,platform or None,language or None,sentiment or None),'q':q,'keyword':keyword,'source':source,'platform':platform,'language':language,'sentiment':sentiment})
     return templates.TemplateResponse('results.html',c)
+
+@app.get('/settings', response_class=HTMLResponse)
+def settings_page(request:Request,msg:str=''):
+    c=ctx(request,'settings',msg)
+    return templates.TemplateResponse('settings.html',c)
+
 @app.get('/api/live')
 def live(): return {'stats':stats()}
 
@@ -159,6 +176,35 @@ async def import_keywords(user_category:str=Form(''),priority:str=Form('MEDIUM')
 def update_keyword_route(i:int, keyword:str=Form(...), user_category:str=Form(''), priority:str=Form('MEDIUM')):
     update_keyword(i,keyword,user_category or None,priority.upper())
     return RedirectResponse('/keywords?msg=Keyword yangilandi',303)
+
+
+@app.post('/admin/clear-results')
+def admin_clear_results(confirm:str=Form('')):
+    if confirm != 'DELETE RESULTS':
+        return RedirectResponse('/settings?msg=Tasdiqlash noto‘g‘ri. DELETE RESULTS deb yozing.',303)
+    clear_results_only()
+    return RedirectResponse('/settings?msg=Natijalar tozalandi',303)
+
+@app.post('/admin/clear-sources')
+def admin_clear_sources(confirm:str=Form('')):
+    if confirm != 'DELETE SOURCES':
+        return RedirectResponse('/settings?msg=Tasdiqlash noto‘g‘ri. DELETE SOURCES deb yozing.',303)
+    clear_sources_only()
+    return RedirectResponse('/settings?msg=Sources tozalandi',303)
+
+@app.post('/admin/clear-keywords')
+def admin_clear_keywords(confirm:str=Form('')):
+    if confirm != 'DELETE KEYWORDS':
+        return RedirectResponse('/settings?msg=Tasdiqlash noto‘g‘ri. DELETE KEYWORDS deb yozing.',303)
+    clear_keywords_only()
+    return RedirectResponse('/settings?msg=Keywords tozalandi',303)
+
+@app.post('/admin/factory-reset')
+def admin_factory_reset(confirm:str=Form('')):
+    if confirm != 'DELETE ALL':
+        return RedirectResponse('/settings?msg=Tasdiqlash noto‘g‘ri. DELETE ALL deb yozing.',303)
+    factory_reset_all()
+    return RedirectResponse('/dashboard?msg=Baza 0 dan tozalandi',303)
 
 @app.post('/scan')
 def scan_now(date_from:str=Form(''),date_to:str=Form('')):

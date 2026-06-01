@@ -243,3 +243,44 @@ def update_keyword(i, keyword, user_category=None, priority='MEDIUM'):
             s.commit()
     finally:
         s.close()
+
+
+def clear_results_only():
+    s=db()
+    try:
+        s.query(Result).delete()
+        s.query(ScanHistory).delete()
+        s.commit()
+    finally:
+        s.close()
+
+def clear_sources_only():
+    s=db()
+    try:
+        s.query(Result).delete()
+        s.query(ScanHistory).delete()
+        s.query(Source).delete()
+        s.commit()
+    finally:
+        s.close()
+
+def clear_keywords_only():
+    s=db()
+    try:
+        s.query(Result).delete()
+        s.query(ScanHistory).delete()
+        s.query(Keyword).delete()
+        s.commit()
+    finally:
+        s.close()
+
+def factory_reset_all():
+    s=db()
+    try:
+        s.query(Result).delete()
+        s.query(ScanHistory).delete()
+        s.query(Keyword).delete()
+        s.query(Source).delete()
+        s.commit()
+    finally:
+        s.close()
