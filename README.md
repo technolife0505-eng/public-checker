@@ -42,3 +42,12 @@ Qo‘shildi:
 - Delete Sources Only
 - Delete Keywords Only
 - Factory Reset Everything
+
+
+## v5.0 Offline AI + keyword fix
+- Tashqi AI API yo‘q.
+- Pul so‘raydigan servis ulanmagan.
+- Sentiment va AI class offline qoidalar asosida ishlaydi.
+- "порадан бош тортди", "мукофот берилди" kabi xabarlar positive.
+- "экстернат имтиҳонлари" kabi oddiy e’lonlar neutral.
+- "си", "ai", "ии" kabi qisqa keywordlar faqat alohida so‘z sifatida qidiriladi.
