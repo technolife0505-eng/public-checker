@@ -53,7 +53,7 @@
 <thead><tr><th>Time</th><th>Platform</th><th>Source</th><th>Keyword</th><th>AI class</th><th>Sentiment</th><th>Text</th><th>Link</th></tr></thead>
 <tbody>
 {% for r in results %}
-<tr><td>{{ r.message_time }}</td><td>{{ r.platform }}</td><td>{{ r.source_username }}</td><td>{{ r.matched_keyword }}</td><td><span class="badge">{{ r.ai_classification }}</span></td><td><span class="badge {{ r.sentiment }}">{{ r.sentiment }}</span></td><td class="text">{{ r.message_text }}</td><td><a href="{{ r.message_url }}" target="_blank">Open</a></td></tr>
+<tr><td>{{ r.message_time or r.created_at }}</td><td>{{ r.platform }}</td><td>{{ r.source_username }}</td><td>{{ r.matched_keyword }}</td><td><span class="badge">{{ r.ai_classification }}</span></td><td><span class="badge {{ r.sentiment }}">{{ r.sentiment }}</span></td><td class="text">{{ r.message_text }}</td><td><a href="{{ r.message_url }}" target="_blank">Open</a></td></tr>
 {% else %}
 <tr><td colspan="8">Hali natija yo‘q.</td></tr>
 {% endfor %}
