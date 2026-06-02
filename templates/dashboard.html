@@ -35,7 +35,7 @@
 <div class="quick-dates">
 
 
-<div class="scan-filter-row">
+<div class="scan-controls-line"><div class="scan-filter-row">
   <div class="ms-wrap" data-ms="platforms">
     <button type="button" class="ms-btn" data-ms-toggle>
       <span id="platformsLabel">Platformalar: Barchasi</span><b>⌄</b>
@@ -74,10 +74,10 @@
 </div>
 
 
-<button type="button" class="quick-btn" onclick="setQuickRange('main',1)">Oxirgi 1 kun</button>
-<button type="button" class="quick-btn" onclick="setQuickRange('main',7)">Oxirgi 7 kun</button>
-<button type="button" class="quick-btn" onclick="setQuickRange('main',30)">Oxirgi 30 kun</button>
-<button type="button" class="quick-btn" onclick="clearDateRange('main')">Tozalash</button>
+<button class="quick-btn" type="button"  onclick="setQuickRange('main',1)">Oxirgi 1 kun</button>
+<button class="quick-btn" type="button"  onclick="setQuickRange('main',7)">Oxirgi 7 kun</button>
+<button class="quick-btn" type="button"  onclick="setQuickRange('main',30)">Oxirgi 30 kun</button>
+<button class="quick-btn" type="button"  onclick="clearDateRange('main')">Tozalash</button></div>
 </div>
 <p style="color:#94a3b8">Sana tanlanmasa oxirgi {{ days }} kun tekshiriladi. Tanlangan boshlanish va tugash sanalari ham qidiruvga kiradi.</p>
 </section>
@@ -118,6 +118,8 @@ bar('sourceChart',sourceData.map(x=>x.name),sourceData.map(x=>x.count));
 
 
 
+
+
 <script>
 (function(){
   function closeAllMS(exceptId){
@@ -125,14 +127,21 @@ bar('sourceChart',sourceData.map(x=>x.name),sourceData.map(x=>x.count));
       if(!exceptId || m.id !== exceptId) m.classList.remove("open");
     });
   }
-  window.toggleMS = function(group){
+  function groupTitle(group){
+    if(group==="platforms") return "Platformalar";
+    if(group==="sources") return "Kanallar";
+    if(group==="keywords") return "Kalit so‘zlar";
+    return group;
+  }
+  window.toggleMS=function(group){
     var menu=document.getElementById(group+"Menu");
     if(!menu) return;
-    var willOpen=!menu.classList.contains("open");
+    var open=!menu.classList.contains("open");
     closeAllMS(group+"Menu");
-    if(willOpen) menu.classList.add("open");
+    if(open) menu.classList.add("open");
   };
-  function updateMSLabel(group,title){
+  function updateMSLabel(group){
+    var title=groupTitle(group);
     var allBox=document.querySelector('[data-group-all="'+group+'"]');
     var checked=[].slice.call(document.querySelectorAll('[data-group-item="'+group+'"]:checked'));
     var label=document.getElementById(group+"Label");
@@ -146,13 +155,11 @@ bar('sourceChart',sourceData.map(x=>x.name),sourceData.map(x=>x.count));
       label.textContent=title+": "+checked.length+" ta tanlandi";
     }
   }
-  function updateAllMSLabels(){
-    updateMSLabel("platforms","Platformalar");
-    updateMSLabel("sources","Kanallar");
-    updateMSLabel("keywords","Kalit so‘zlar");
+  function updateAll(){
+    ["platforms","sources","keywords"].forEach(updateMSLabel);
   }
   document.addEventListener("click",function(e){
-    var btn=e.target.closest("[data-ms-toggle]");
+    var btn=e.target.closest(".ms-btn");
     if(btn){
       e.preventDefault();
       e.stopPropagation();
@@ -167,7 +174,9 @@ bar('sourceChart',sourceData.map(x=>x.name),sourceData.map(x=>x.count));
     var item=e.target.closest("[data-group-item]");
     if(all){
       var g=all.getAttribute("data-group-all");
-      if(all.checked) document.querySelectorAll('[data-group-item="'+g+'"]').forEach(function(x){x.checked=false;});
+      if(all.checked){
+        document.querySelectorAll('[data-group-item="'+g+'"]').forEach(function(x){x.checked=false;});
+      }
     }
     if(item){
       var g2=item.getAttribute("data-group-item");
@@ -176,8 +185,8 @@ bar('sourceChart',sourceData.map(x=>x.name),sourceData.map(x=>x.count));
       var any=[].slice.call(document.querySelectorAll('[data-group-item="'+g2+'"]')).some(function(x){return x.checked;});
       if(!any && allBox) allBox.checked=true;
     }
-    updateAllMSLabels();
+    updateAll();
   });
-  document.addEventListener("DOMContentLoaded",updateAllMSLabels);
+  document.addEventListener("DOMContentLoaded",updateAll);
 })();
 </script>
