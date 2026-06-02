@@ -37,7 +37,7 @@
 
 <div class="scan-filter-row">
   <div class="ms-wrap" data-ms="platforms">
-    <button type="button" class="ms-btn" onclick="toggleMS('platforms')">
+    <button type="button" class="ms-btn" data-ms-toggle>
       <span id="platformsLabel">Platformalar: Barchasi</span><b>⌄</b>
     </button>
     <div class="ms-menu" id="platformsMenu">
@@ -49,7 +49,7 @@
   </div>
 
   <div class="ms-wrap" data-ms="sources">
-    <button type="button" class="ms-btn" onclick="toggleMS('sources')">
+    <button type="button" class="ms-btn" data-ms-toggle>
       <span id="sourcesLabel">Kanallar: Barchasi</span><b>⌄</b>
     </button>
     <div class="ms-menu" id="sourcesMenu">
@@ -61,7 +61,7 @@
   </div>
 
   <div class="ms-wrap" data-ms="keywords">
-    <button type="button" class="ms-btn" onclick="toggleMS('keywords')">
+    <button type="button" class="ms-btn" data-ms-toggle>
       <span id="keywordsLabel">Kalit so‘zlar: Barchasi</span><b>⌄</b>
     </button>
     <div class="ms-menu" id="keywordsMenu">
@@ -74,10 +74,10 @@
 </div>
 
 
-<button type="button" onclick="setQuickRange('main',1)">Oxirgi 1 kun</button>
-<button type="button" onclick="setQuickRange('main',7)">Oxirgi 7 kun</button>
-<button type="button" onclick="setQuickRange('main',30)">Oxirgi 30 kun</button>
-<button type="button" onclick="clearDateRange('main')">Tozalash</button>
+<button type="button" class="quick-btn" onclick="setQuickRange('main',1)">Oxirgi 1 kun</button>
+<button type="button" class="quick-btn" onclick="setQuickRange('main',7)">Oxirgi 7 kun</button>
+<button type="button" class="quick-btn" onclick="setQuickRange('main',30)">Oxirgi 30 kun</button>
+<button type="button" class="quick-btn" onclick="clearDateRange('main')">Tozalash</button>
 </div>
 <p style="color:#94a3b8">Sana tanlanmasa oxirgi {{ days }} kun tekshiriladi. Tanlangan boshlanish va tugash sanalari ham qidiruvga kiradi.</p>
 </section>
@@ -116,46 +116,68 @@ bar('sourceChart',sourceData.map(x=>x.name),sourceData.map(x=>x.count));
 
 
 
+
+
 <script>
-function toggleMS(group){
-  document.querySelectorAll(".ms-menu").forEach(m=>{
-    if(m.id !== group+"Menu") m.classList.remove("open");
+(function(){
+  function closeAllMS(exceptId){
+    document.querySelectorAll(".ms-menu").forEach(function(m){
+      if(!exceptId || m.id !== exceptId) m.classList.remove("open");
+    });
+  }
+  window.toggleMS = function(group){
+    var menu=document.getElementById(group+"Menu");
+    if(!menu) return;
+    var willOpen=!menu.classList.contains("open");
+    closeAllMS(group+"Menu");
+    if(willOpen) menu.classList.add("open");
+  };
+  function updateMSLabel(group,title){
+    var allBox=document.querySelector('[data-group-all="'+group+'"]');
+    var checked=[].slice.call(document.querySelectorAll('[data-group-item="'+group+'"]:checked'));
+    var label=document.getElementById(group+"Label");
+    if(!label) return;
+    if(allBox && allBox.checked){
+      label.textContent=title+": Barchasi";
+    }else if(checked.length===0){
+      if(allBox) allBox.checked=true;
+      label.textContent=title+": Barchasi";
+    }else{
+      label.textContent=title+": "+checked.length+" ta tanlandi";
+    }
+  }
+  function updateAllMSLabels(){
+    updateMSLabel("platforms","Platformalar");
+    updateMSLabel("sources","Kanallar");
+    updateMSLabel("keywords","Kalit so‘zlar");
+  }
+  document.addEventListener("click",function(e){
+    var btn=e.target.closest("[data-ms-toggle]");
+    if(btn){
+      e.preventDefault();
+      e.stopPropagation();
+      var wrap=btn.closest(".ms-wrap");
+      if(wrap) window.toggleMS(wrap.getAttribute("data-ms"));
+      return;
+    }
+    if(!e.target.closest(".ms-wrap")) closeAllMS();
   });
-  const menu=document.getElementById(group+"Menu");
-  if(menu) menu.classList.toggle("open");
-}
-function updateMSLabel(group,title){
-  const allBox=document.querySelector('[data-group-all="'+group+'"]');
-  const checked=[...document.querySelectorAll('[data-group-item="'+group+'"]:checked')];
-  const label=document.getElementById(group+"Label");
-  if(!label) return;
-  if(allBox && allBox.checked) label.textContent=title+": Barchasi";
-  else if(checked.length===0){ if(allBox) allBox.checked=true; label.textContent=title+": Barchasi"; }
-  else label.textContent=title+": "+checked.length+" ta tanlandi";
-}
-function updateAllMSLabels(){
-  updateMSLabel("platforms","Platformalar");
-  updateMSLabel("sources","Kanallar");
-  updateMSLabel("keywords","Kalit so‘zlar");
-}
-document.addEventListener("change",function(e){
-  const all=e.target.closest("[data-group-all]");
-  const item=e.target.closest("[data-group-item]");
-  if(all){
-    const g=all.getAttribute("data-group-all");
-    if(all.checked) document.querySelectorAll('[data-group-item="'+g+'"]').forEach(x=>x.checked=false);
-  }
-  if(item){
-    const g=item.getAttribute("data-group-item");
-    const allBox=document.querySelector('[data-group-all="'+g+'"]');
-    if(item.checked && allBox) allBox.checked=false;
-    const any=[...document.querySelectorAll('[data-group-item="'+g+'"]')].some(x=>x.checked);
-    if(!any && allBox) allBox.checked=true;
-  }
-  updateAllMSLabels();
-});
-document.addEventListener("click",function(e){
-  if(!e.target.closest(".ms-wrap")) document.querySelectorAll(".ms-menu").forEach(m=>m.classList.remove("open"));
-});
-document.addEventListener("DOMContentLoaded",updateAllMSLabels);
+  document.addEventListener("change",function(e){
+    var all=e.target.closest("[data-group-all]");
+    var item=e.target.closest("[data-group-item]");
+    if(all){
+      var g=all.getAttribute("data-group-all");
+      if(all.checked) document.querySelectorAll('[data-group-item="'+g+'"]').forEach(function(x){x.checked=false;});
+    }
+    if(item){
+      var g2=item.getAttribute("data-group-item");
+      var allBox=document.querySelector('[data-group-all="'+g2+'"]');
+      if(item.checked && allBox) allBox.checked=false;
+      var any=[].slice.call(document.querySelectorAll('[data-group-item="'+g2+'"]')).some(function(x){return x.checked;});
+      if(!any && allBox) allBox.checked=true;
+    }
+    updateAllMSLabels();
+  });
+  document.addEventListener("DOMContentLoaded",updateAllMSLabels);
+})();
 </script>
