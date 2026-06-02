@@ -95,3 +95,11 @@ Tuzatildi:
 - Platformalar/Kanallar/Kalit so‘zlar va Oxirgi 1/7/30 kun/Tozalash tugmalari bir xil balandlikka keltirildi.
 - Dropdown ichidagi scroll bar yashirildi.
 - Dropdown panel card ichida kesilib qolmasligi uchun z-index/overflow tuzatildi.
+
+
+## v5.0.7 Inline dropdown fix
+Tuzatildi:
+- Platformalar/Kanallar/Kalit so‘zlar va Oxirgi 1/7/30/Tozalash bitta qatorda.
+- Barcha tugmalar balandligi bir xil.
+- Dropdown bosilganda ro‘yxat ochiladi.
+- Dropdown ichidagi scroll bar yashirildi.
