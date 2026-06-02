@@ -109,3 +109,8 @@ Tuzatildi:
 Tuzatildi:
 - Dropdown ochilmasligi muammosi inline onclick orqali tuzatildi.
 - Dropdown menyu card ichida kesilmasligi uchun z-index/overflow kuchaytirildi.
+
+
+## v5.0.9 Dropdown JS fixed
+- toggleMS is not defined xatosi tuzatildi.
+- Dropdown JS /static/multiselect.js fayliga chiqarildi.
