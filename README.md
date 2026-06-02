@@ -103,3 +103,9 @@ Tuzatildi:
 - Barcha tugmalar balandligi bir xil.
 - Dropdown bosilganda ro‘yxat ochiladi.
 - Dropdown ichidagi scroll bar yashirildi.
+
+
+## v5.0.8 Dropdown open fix
+Tuzatildi:
+- Dropdown ochilmasligi muammosi inline onclick orqali tuzatildi.
+- Dropdown menyu card ichida kesilmasligi uchun z-index/overflow kuchaytirildi.
