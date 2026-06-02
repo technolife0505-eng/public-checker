@@ -78,3 +78,12 @@ Qo‘shildi/tuzatildi:
 - Keyword matching qat’iy: mobil != avtomobil, ai == AI.
 - Matn va keywordlar kichik harfga o‘tkazilib solishtiriladi.
 - O‘zbekiston vaqti formatda ko‘rsatiladi, mikrosekundalar olib tashlandi.
+
+
+## v5.0.5 Multi-select dropdown
+Tuzatildi:
+- Platforma/Kanal/Kalit so‘z filtrlari katta paneldan dropdown multi-select ko‘rinishiga o‘tkazildi.
+- Barchasi checkboxi qoldi.
+- Tanlanganlar soni ko‘rsatiladi.
+- Scroll bar yashirildi.
+- Dashboard balandligi ixcham bo‘ldi.
