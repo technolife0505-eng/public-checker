@@ -87,3 +87,11 @@ Tuzatildi:
 - Tanlanganlar soni ko‘rsatiladi.
 - Scroll bar yashirildi.
 - Dashboard balandligi ixcham bo‘ldi.
+
+
+## v5.0.6 Dropdown + button size fix
+Tuzatildi:
+- Multi-select dropdown bosilganda ochiladi.
+- Platformalar/Kanallar/Kalit so‘zlar va Oxirgi 1/7/30 kun/Tozalash tugmalari bir xil balandlikka keltirildi.
+- Dropdown ichidagi scroll bar yashirildi.
+- Dropdown panel card ichida kesilib qolmasligi uchun z-index/overflow tuzatildi.
