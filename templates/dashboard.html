@@ -34,37 +34,45 @@
 </form>
 <div class="quick-dates">
 
-<div class="scan-filter-grid">
-  <div class="filter-card">
-    <div class="filter-title">Platformalar</div>
-    <label class="check-row"><input type="checkbox" data-group-all="platforms" checked> Barchasi</label>
-    <div class="check-list">
+
+<div class="scan-filter-row">
+  <div class="ms-wrap" data-ms="platforms">
+    <button type="button" class="ms-btn" onclick="toggleMS('platforms')">
+      <span id="platformsLabel">Platformalar: Barchasi</span><b>⌄</b>
+    </button>
+    <div class="ms-menu" id="platformsMenu">
+      <label class="ms-option"><input type="checkbox" data-group-all="platforms" checked> Barchasi</label>
       {% for p in platforms %}
-      <label class="check-row"><input type="checkbox" name="platforms" value="{{ p }}" data-group-item="platforms"> {{ p }}</label>
+      <label class="ms-option"><input type="checkbox" name="platforms" value="{{ p }}" data-group-item="platforms"> {{ p }}</label>
       {% endfor %}
     </div>
   </div>
 
-  <div class="filter-card">
-    <div class="filter-title">Kanallar</div>
-    <label class="check-row"><input type="checkbox" data-group-all="sources" checked> Barchasi</label>
-    <div class="check-list">
+  <div class="ms-wrap" data-ms="sources">
+    <button type="button" class="ms-btn" onclick="toggleMS('sources')">
+      <span id="sourcesLabel">Kanallar: Barchasi</span><b>⌄</b>
+    </button>
+    <div class="ms-menu" id="sourcesMenu">
+      <label class="ms-option"><input type="checkbox" data-group-all="sources" checked> Barchasi</label>
       {% for s in sources_list %}
-      <label class="check-row"><input type="checkbox" name="source_ids" value="{{ s.id }}" data-group-item="sources"> {{ s.name or s.link }}</label>
+      <label class="ms-option"><input type="checkbox" name="source_ids" value="{{ s.id }}" data-group-item="sources"> {{ s.name or s.link }}</label>
       {% endfor %}
     </div>
   </div>
 
-  <div class="filter-card">
-    <div class="filter-title">Kalit so‘zlar</div>
-    <label class="check-row"><input type="checkbox" data-group-all="keywords" checked> Barchasi</label>
-    <div class="check-list">
+  <div class="ms-wrap" data-ms="keywords">
+    <button type="button" class="ms-btn" onclick="toggleMS('keywords')">
+      <span id="keywordsLabel">Kalit so‘zlar: Barchasi</span><b>⌄</b>
+    </button>
+    <div class="ms-menu" id="keywordsMenu">
+      <label class="ms-option"><input type="checkbox" data-group-all="keywords" checked> Barchasi</label>
       {% for k in keywords_list %}
-      <label class="check-row"><input type="checkbox" name="keyword_ids" value="{{ k.id }}" data-group-item="keywords"> {{ k.keyword }}</label>
+      <label class="ms-option"><input type="checkbox" name="keyword_ids" value="{{ k.id }}" data-group-item="keywords"> {{ k.keyword }}</label>
       {% endfor %}
     </div>
   </div>
 </div>
+
 
 <button type="button" onclick="setQuickRange('main',1)">Oxirgi 1 kun</button>
 <button type="button" onclick="setQuickRange('main',7)">Oxirgi 7 kun</button>
@@ -106,13 +114,36 @@ bar('sourceChart',sourceData.map(x=>x.name),sourceData.map(x=>x.count));
 </script>
 {% endblock %}
 
+
+
 <script>
-document.addEventListener("change", function(e){
+function toggleMS(group){
+  document.querySelectorAll(".ms-menu").forEach(m=>{
+    if(m.id !== group+"Menu") m.classList.remove("open");
+  });
+  const menu=document.getElementById(group+"Menu");
+  if(menu) menu.classList.toggle("open");
+}
+function updateMSLabel(group,title){
+  const allBox=document.querySelector('[data-group-all="'+group+'"]');
+  const checked=[...document.querySelectorAll('[data-group-item="'+group+'"]:checked')];
+  const label=document.getElementById(group+"Label");
+  if(!label) return;
+  if(allBox && allBox.checked) label.textContent=title+": Barchasi";
+  else if(checked.length===0){ if(allBox) allBox.checked=true; label.textContent=title+": Barchasi"; }
+  else label.textContent=title+": "+checked.length+" ta tanlandi";
+}
+function updateAllMSLabels(){
+  updateMSLabel("platforms","Platformalar");
+  updateMSLabel("sources","Kanallar");
+  updateMSLabel("keywords","Kalit so‘zlar");
+}
+document.addEventListener("change",function(e){
   const all=e.target.closest("[data-group-all]");
   const item=e.target.closest("[data-group-item]");
   if(all){
     const g=all.getAttribute("data-group-all");
-    document.querySelectorAll('[data-group-item="'+g+'"]').forEach(x=>x.checked=false);
+    if(all.checked) document.querySelectorAll('[data-group-item="'+g+'"]').forEach(x=>x.checked=false);
   }
   if(item){
     const g=item.getAttribute("data-group-item");
@@ -121,5 +152,10 @@ document.addEventListener("change", function(e){
     const any=[...document.querySelectorAll('[data-group-item="'+g+'"]')].some(x=>x.checked);
     if(!any && allBox) allBox.checked=true;
   }
+  updateAllMSLabels();
 });
+document.addEventListener("click",function(e){
+  if(!e.target.closest(".ms-wrap")) document.querySelectorAll(".ms-menu").forEach(m=>m.classList.remove("open"));
+});
+document.addEventListener("DOMContentLoaded",updateAllMSLabels);
 </script>
