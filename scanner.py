@@ -1,21 +1,9 @@
 import re, requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone, timedelta
-from ai_rules import classify_text, sentiment_text, risk_level
+from ai_rules import classify_full
 
 HEADERS={'User-Agent':'Mozilla/5.0'}
-
-
-def keyword_matches(text, keyword):
-    text_l = (text or '').lower()
-    kw = (keyword or '').lower().strip()
-    if not kw:
-        return 0
-    if len(kw) <= 3:
-        letters = r"A-Za-zА-Яа-яЁёЎўҚқҒғҲҳІі"
-        pattern = r"(?<![" + letters + r"])" + re.escape(kw) + r"(?![" + letters + r"])"
-        return len(re.findall(pattern, text_l, flags=re.IGNORECASE))
-    return text_l.count(kw)
 
 def normalize_source_link(platform,link):
     platform=(platform or 'telegram').lower().strip(); link=(link or '').strip()
@@ -35,8 +23,15 @@ def parse_dt(v):
     try: return datetime.fromisoformat(v.replace('Z','+00:00'))
     except Exception: return None
 def count_kw(text,keyword):
-    text=(text or '').lower(); keyword=(keyword or '').lower().strip()
-    return text.count(keyword) if keyword else 0
+    text=(text or '').lower()
+    keyword=(keyword or '').lower().strip()
+    if not keyword:
+        return 0
+    if len(keyword) <= 3:
+        letters = r"A-Za-zА-Яа-яЁёЎўҚқҒғҲҳІі"
+        pattern = r"(?<![" + letters + r"])" + re.escape(keyword) + r"(?![" + letters + r"])"
+        return len(re.findall(pattern, text, flags=re.IGNORECASE))
+    return text.count(keyword)
 def fetch_page(username,before=None):
     url=f'https://t.me/s/{username}'
     if before: url+=f'?before={before}'
@@ -78,7 +73,6 @@ def scan_source_for_keywords(source,keywords,date_from=None,date_to=None):
         for kw in keywords:
             cnt=count_kw(p['text'],kw.keyword)
             if cnt>=1:
-                sent=sentiment_text(p['text'])
-                ai_classification, sentiment, risk_level = classify_text(text, getattr(kw, 'user_category', None))
-                results.append({**p,'source_language':source.language,'matched_keyword':kw.keyword,'user_category':kw.user_category,'repetition_count':cnt,'ai_classification': ai_classification,'sentiment': sentiment,'risk_level': risk_level,sent)})
+                ai_classification, sent, risk = classify_full(p['text'], kw.user_category)
+                results.append({**p,'source_language':source.language,'matched_keyword':kw.keyword,'user_category':kw.user_category,'repetition_count':cnt,'ai_classification':ai_classification,'sentiment':sent,'risk_level':risk})
     return results

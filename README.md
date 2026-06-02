@@ -44,10 +44,11 @@ Qo‘shildi:
 - Factory Reset Everything
 
 
-## v5.0 Offline AI + keyword fix
+## v5.0.1 Offline AI fixed
+Tuzatildi:
+- Render deploy xatosi bartaraf etildi.
+- scanner.py importlari to‘g‘rilandi.
 - Tashqi AI API yo‘q.
-- Pul so‘raydigan servis ulanmagan.
-- Sentiment va AI class offline qoidalar asosida ishlaydi.
-- "порадан бош тортди", "мукофот берилди" kabi xabarlar positive.
-- "экстернат имтиҳонлари" kabi oddiy e’lonlar neutral.
 - "си", "ai", "ии" kabi qisqa keywordlar faqat alohida so‘z sifatida qidiriladi.
+- Pora olmagan / mukofotlangan xabarlar positive chiqadi.
+- Eksternat/imtiҳон/e’lon xabarlari neutral chiqadi.
