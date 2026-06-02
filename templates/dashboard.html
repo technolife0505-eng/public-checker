@@ -37,7 +37,7 @@
 
 <div class="scan-controls-line"><div class="scan-filter-row">
   <div class="ms-wrap" data-ms="platforms">
-    <button type="button" class="ms-btn" data-ms-toggle>
+    <button type="button" class="ms-btn" onclick="return toggleMS(this)">
       <span id="platformsLabel">Platformalar: Barchasi</span><b>⌄</b>
     </button>
     <div class="ms-menu" id="platformsMenu">
@@ -49,7 +49,7 @@
   </div>
 
   <div class="ms-wrap" data-ms="sources">
-    <button type="button" class="ms-btn" data-ms-toggle>
+    <button type="button" class="ms-btn" onclick="return toggleMS(this)">
       <span id="sourcesLabel">Kanallar: Barchasi</span><b>⌄</b>
     </button>
     <div class="ms-menu" id="sourcesMenu">
@@ -61,7 +61,7 @@
   </div>
 
   <div class="ms-wrap" data-ms="keywords">
-    <button type="button" class="ms-btn" data-ms-toggle>
+    <button type="button" class="ms-btn" onclick="return toggleMS(this)">
       <span id="keywordsLabel">Kalit so‘zlar: Barchasi</span><b>⌄</b>
     </button>
     <div class="ms-menu" id="keywordsMenu">
@@ -120,73 +120,79 @@ bar('sourceChart',sourceData.map(x=>x.name),sourceData.map(x=>x.count));
 
 
 
+
+
 <script>
-(function(){
-  function closeAllMS(exceptId){
-    document.querySelectorAll(".ms-menu").forEach(function(m){
-      if(!exceptId || m.id !== exceptId) m.classList.remove("open");
-    });
-  }
-  function groupTitle(group){
-    if(group==="platforms") return "Platformalar";
-    if(group==="sources") return "Kanallar";
-    if(group==="keywords") return "Kalit so‘zlar";
-    return group;
-  }
-  window.toggleMS=function(group){
-    var menu=document.getElementById(group+"Menu");
-    if(!menu) return;
-    var open=!menu.classList.contains("open");
-    closeAllMS(group+"Menu");
-    if(open) menu.classList.add("open");
-  };
-  function updateMSLabel(group){
-    var title=groupTitle(group);
-    var allBox=document.querySelector('[data-group-all="'+group+'"]');
-    var checked=[].slice.call(document.querySelectorAll('[data-group-item="'+group+'"]:checked'));
-    var label=document.getElementById(group+"Label");
-    if(!label) return;
-    if(allBox && allBox.checked){
-      label.textContent=title+": Barchasi";
-    }else if(checked.length===0){
-      if(allBox) allBox.checked=true;
-      label.textContent=title+": Barchasi";
-    }else{
-      label.textContent=title+": "+checked.length+" ta tanlandi";
+function closeAllDropdowns(exceptMenu){
+  document.querySelectorAll(".ms-menu").forEach(function(menu){
+    if(menu !== exceptMenu){
+      menu.classList.remove("open");
+      menu.style.display = "none";
     }
-  }
-  function updateAll(){
-    ["platforms","sources","keywords"].forEach(updateMSLabel);
-  }
-  document.addEventListener("click",function(e){
-    var btn=e.target.closest(".ms-btn");
-    if(btn){
-      e.preventDefault();
-      e.stopPropagation();
-      var wrap=btn.closest(".ms-wrap");
-      if(wrap) window.toggleMS(wrap.getAttribute("data-ms"));
-      return;
-    }
-    if(!e.target.closest(".ms-wrap")) closeAllMS();
   });
-  document.addEventListener("change",function(e){
-    var all=e.target.closest("[data-group-all]");
-    var item=e.target.closest("[data-group-item]");
-    if(all){
-      var g=all.getAttribute("data-group-all");
-      if(all.checked){
-        document.querySelectorAll('[data-group-item="'+g+'"]').forEach(function(x){x.checked=false;});
-      }
+}
+function toggleMS(btn){
+  var wrap = btn.closest(".ms-wrap");
+  if(!wrap) return false;
+  var menu = wrap.querySelector(".ms-menu");
+  if(!menu) return false;
+  var isOpen = menu.classList.contains("open");
+  closeAllDropdowns(menu);
+  if(isOpen){
+    menu.classList.remove("open");
+    menu.style.display = "none";
+  }else{
+    menu.classList.add("open");
+    menu.style.display = "block";
+  }
+  return false;
+}
+function msTitle(group){
+  if(group==="platforms") return "Platformalar";
+  if(group==="sources") return "Kanallar";
+  if(group==="keywords") return "Kalit so‘zlar";
+  return group;
+}
+function updateMSLabel(group){
+  var title = msTitle(group);
+  var allBox = document.querySelector('[data-group-all="'+group+'"]');
+  var checked = Array.from(document.querySelectorAll('[data-group-item="'+group+'"]:checked'));
+  var label = document.getElementById(group+"Label");
+  if(!label) return;
+  if(allBox && allBox.checked){
+    label.textContent = title + ": Barchasi";
+  }else if(checked.length===0){
+    if(allBox) allBox.checked = true;
+    label.textContent = title + ": Barchasi";
+  }else{
+    label.textContent = title + ": " + checked.length + " ta tanlandi";
+  }
+}
+function updateAllMS(){
+  ["platforms","sources","keywords"].forEach(updateMSLabel);
+}
+document.addEventListener("change", function(e){
+  var all = e.target.closest("[data-group-all]");
+  var item = e.target.closest("[data-group-item]");
+  if(all){
+    var g = all.getAttribute("data-group-all");
+    if(all.checked){
+      document.querySelectorAll('[data-group-item="'+g+'"]').forEach(function(x){x.checked = false;});
     }
-    if(item){
-      var g2=item.getAttribute("data-group-item");
-      var allBox=document.querySelector('[data-group-all="'+g2+'"]');
-      if(item.checked && allBox) allBox.checked=false;
-      var any=[].slice.call(document.querySelectorAll('[data-group-item="'+g2+'"]')).some(function(x){return x.checked;});
-      if(!any && allBox) allBox.checked=true;
-    }
-    updateAll();
-  });
-  document.addEventListener("DOMContentLoaded",updateAll);
-})();
+  }
+  if(item){
+    var g2 = item.getAttribute("data-group-item");
+    var allBox = document.querySelector('[data-group-all="'+g2+'"]');
+    if(item.checked && allBox) allBox.checked = false;
+    var any = Array.from(document.querySelectorAll('[data-group-item="'+g2+'"]')).some(function(x){return x.checked;});
+    if(!any && allBox) allBox.checked = true;
+  }
+  updateAllMS();
+});
+document.addEventListener("click", function(e){
+  if(e.target.closest(".ms-btn")) return;
+  if(e.target.closest(".ms-menu")) return;
+  closeAllDropdowns(null);
+});
+document.addEventListener("DOMContentLoaded", updateAllMS);
 </script>
