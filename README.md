@@ -52,3 +52,29 @@ Tuzatildi:
 - "си", "ai", "ии" kabi qisqa keywordlar faqat alohida so‘z sifatida qidiriladi.
 - Pora olmagan / mukofotlangan xabarlar positive chiqadi.
 - Eksternat/imtiҳон/e’lon xabarlari neutral chiqadi.
+
+
+## v5.0.2 Title + Calendar JS fix
+Tuzatildi:
+- Browser tab title: "Media Monitoring Platform"
+- Dashboard inline datepicker JS dagi Unexpected string xatosi
+- Keraksiz duplicate calendar.js chaqiruvi olib tashlandi
+- favicon.ico 404 logi yo‘qolishi uchun 204 route qo‘shildi
+
+
+## v5.0.3 Uzbekistan time fix
+Tuzatildi:
+- Telegram/Render UTC vaqti O‘zbekiston vaqti UTC+5 ga o‘tkaziladi.
+- message_time None bo‘lsa, avtomatik scan/created vaqt bilan to‘ldiriladi.
+- Jadval va exportlarda vaqt bo‘sh chiqmaydi.
+- Format: YYYY-MM-DD HH:MM:SS
+
+
+## v5.0.4 Filters + strict keyword + time
+Qo‘shildi/tuzatildi:
+- "Hammasi" so‘zi "Barchasi" ga almashtirildi.
+- Real tekshirishga Platformalar, Kanallar, Kalit so‘zlar checkbox filtrlari qo‘shildi.
+- Har birida "Barchasi" varianti bor.
+- Keyword matching qat’iy: mobil != avtomobil, ai == AI.
+- Matn va keywordlar kichik harfga o‘tkazilib solishtiriladi.
+- O‘zbekiston vaqti formatda ko‘rsatiladi, mikrosekundalar olib tashlandi.

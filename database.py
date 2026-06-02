@@ -1,4 +1,5 @@
-from datetime import datetime
+import re
+from datetime import datetime, timedelta
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, Boolean, UniqueConstraint, func
 from sqlalchemy.orm import declarative_base, sessionmaker
 from config import DATABASE_URL
@@ -6,6 +7,65 @@ from config import DATABASE_URL
 engine=create_engine(DATABASE_URL, pool_pre_ping=True)
 SessionLocal=sessionmaker(bind=engine)
 Base=declarative_base()
+
+UZ_OFFSET_HOURS = 5
+
+def normalize_time_uz(dt):
+    """Return Uzbekistan time without microseconds. Telegram/Render usually gives UTC."""
+    if dt is None:
+        dt = datetime.utcnow()
+    try:
+        # if datetime already has timezone, convert by simple offset after making naive UTC
+        dt = dt.replace(tzinfo=None)
+    except Exception:
+        dt = datetime.utcnow()
+    return (dt + timedelta(hours=UZ_OFFSET_HOURS)).replace(microsecond=0)
+
+def display_time(dt):
+    if dt is None:
+        return ""
+    try:
+        return dt.replace(microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+    except Exception:
+        return str(dt).split(".")[0]
+
+def normalize_keyword_text(value):
+    text = (value or "").lower().strip()
+    text = text.replace("ё", "е")
+    text = text.replace("ў", "у")
+    text = text.replace("қ", "к")
+    text = text.replace("ғ", "г")
+    text = text.replace("ҳ", "х")
+    text = text.replace("ʼ", "'").replace("‘", "'").replace("’", "'")
+    text = re.sub(r"\s+", " ", text)
+    return text
+
+def strict_keyword_count(text, keyword):
+    """Whole-word / whole-phrase case-insensitive match.
+    mobil != avtomobil, ai == AI, raqamli hukumat == Raqamli Hukumat.
+    """
+    text_n = normalize_keyword_text(text)
+    kw = normalize_keyword_text(keyword)
+    if not kw:
+        return 0
+    letters = r"A-Za-zА-Яа-яЁёЎўҚқҒғҲҳІі0-9"
+    pattern = r"(?<![" + letters + r"])" + re.escape(kw) + r"(?![" + letters + r"])"
+    return len(re.findall(pattern, text_n, flags=re.IGNORECASE))
+
+
+UZ_OFFSET_HOURS = 5
+
+def to_uz_time(dt):
+    if dt is None:
+        return datetime.utcnow() + timedelta(hours=UZ_OFFSET_HOURS)
+    try:
+        # Telegram/Render times are usually UTC. Store/display as Uzbekistan time.
+        return dt + timedelta(hours=UZ_OFFSET_HOURS)
+    except Exception:
+        return datetime.utcnow() + timedelta(hours=UZ_OFFSET_HOURS)
+
+def fmt_time(dt):
+    return display_time(dt)
 
 class Source(Base):
     __tablename__='sources'
@@ -103,7 +163,7 @@ def save_result(item):
     try:
         ex=s.query(Result).filter(Result.platform==item['platform'],Result.source_username==item['username'],Result.message_id==item['message_id'],Result.matched_keyword==item['matched_keyword']).first()
         if ex: return False
-        s.add(Result(platform=item['platform'],source_link=item['source_link'],source_username=item['username'],source_title=item.get('source_title'),source_language=item.get('source_language'),message_id=item['message_id'],message_url=item['message_url'],message_text=item['text'],matched_keyword=item['matched_keyword'],user_category=item.get('user_category'),repetition_count=item['repetition_count'],message_time=item.get('message_time'),ai_classification=item.get('ai_classification'),sentiment=item.get('sentiment'),risk_level=item.get('risk_level')))
+        s.add(Result(platform=item['platform'],source_link=item['source_link'],source_username=item['username'],source_title=item.get('source_title'),source_language=item.get('source_language'),message_id=item['message_id'],message_url=item['message_url'],message_text=item['text'],matched_keyword=item['matched_keyword'],user_category=item.get('user_category'),repetition_count=item['repetition_count'],message_time=normalize_time_uz(item.get('message_time')),ai_classification=item.get('ai_classification'),sentiment=item.get('sentiment'),risk_level=item.get('risk_level')))
         s.commit(); return True
     finally: s.close()
 
@@ -117,7 +177,11 @@ def get_results(q=None,keyword=None,source=None,platform=None,language=None,sent
         if platform: query=query.filter(Result.platform==platform)
         if language: query=query.filter(Result.source_language==language)
         if sentiment: query=query.filter(Result.sentiment==sentiment)
-        return query.order_by(Result.created_at.desc()).limit(limit).all()
+        rows=query.order_by(Result.created_at.desc()).limit(limit).all()
+        for r in rows:
+            if r.message_time is None:
+                r.message_time = normalize_time_uz(r.created_at)
+        return rows
     finally: s.close()
 
 def cnt_source(username):

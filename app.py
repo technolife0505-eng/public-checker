@@ -51,9 +51,15 @@ def ping():
 def health():
     return Response(content='ok', media_type='text/plain', status_code=200)
 
+
+@app.get('/favicon.ico')
+def favicon():
+    return Response(status_code=204)
+
 @app.get('/dashboard',response_class=HTMLResponse)
 def dashboard(request:Request,msg:str=''):
-    c=ctx(request,'dashboard',msg); c.update({'results':get_results(limit=100),'keyword_chart':chart('matched_keyword'),'source_chart':chart('source_username'),'daily_chart':daily()})
+    c=ctx(request,'dashboard',msg)
+    c.update({'sources_list':get_sources(),'keywords_list':get_keywords(),'platforms':['Telegram','Facebook','Instagram','YouTube','X / Twitter','TikTok','News / RSS']}); c.update({'results':get_results(limit=100),'keyword_chart':chart('matched_keyword'),'source_chart':chart('source_username'),'daily_chart':daily()})
     return templates.TemplateResponse('dashboard.html',c)
 @app.get('/sources',response_class=HTMLResponse)
 def sources_page(request:Request,msg:str='',edit_id:int=0):

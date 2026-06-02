@@ -1,3 +1,4 @@
+from database import strict_keyword_count
 import re, requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone, timedelta
@@ -23,15 +24,8 @@ def parse_dt(v):
     try: return datetime.fromisoformat(v.replace('Z','+00:00'))
     except Exception: return None
 def count_kw(text,keyword):
-    text=(text or '').lower()
-    keyword=(keyword or '').lower().strip()
-    if not keyword:
-        return 0
-    if len(keyword) <= 3:
-        letters = r"A-Za-zА-Яа-яЁёЎўҚқҒғҲҳІі"
-        pattern = r"(?<![" + letters + r"])" + re.escape(keyword) + r"(?![" + letters + r"])"
-        return len(re.findall(pattern, text, flags=re.IGNORECASE))
-    return text.count(keyword)
+    return strict_keyword_count(text, keyword)
+
 def fetch_page(username,before=None):
     url=f'https://t.me/s/{username}'
     if before: url+=f'?before={before}'
