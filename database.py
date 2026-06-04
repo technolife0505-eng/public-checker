@@ -1,4 +1,6 @@
 import re
+import hashlib
+from types import SimpleNamespace
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, Boolean, UniqueConstraint, func
 from sqlalchemy.orm import declarative_base, sessionmaker
@@ -158,6 +160,67 @@ def get_keywords(active_only=False):
         return q.order_by(Keyword.id.desc()).all()
     finally: s.close()
 
+
+def duplicate_norm_text(text):
+    """Normalize text for duplicate grouping across different channels."""
+    t = normalize_keyword_text(text or "")
+    t = re.sub(r"https?://\S+", " ", t)
+    t = re.sub(r"t\.me/\S+", " ", t)
+    t = re.sub(r"@\w+", " ", t)
+    t = re.sub(r"#\w+", " ", t)
+    # remove most emoji/symbol noise but keep letters/numbers/punctuation spacing light
+    t = re.sub(r"[^\w\sА-Яа-яЁёЎўҚқҒғҲҳІі'-]+", " ", t, flags=re.UNICODE)
+    t = re.sub(r"\s+", " ", t).strip()
+    return t
+
+def duplicate_key(result):
+    base = duplicate_norm_text(getattr(result, "message_text", ""))
+    kw = normalize_keyword_text(getattr(result, "matched_keyword", ""))
+    return hashlib.sha1((kw + "||" + base).encode("utf-8", errors="ignore")).hexdigest()
+
+def group_duplicate_results(rows):
+    """Return display rows. DB still keeps every result, but UI gets one row per duplicate group."""
+    groups = {}
+    order = []
+    for r in rows:
+        key = duplicate_key(r)
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+        groups[key].append(r)
+
+    display = []
+    for key in order:
+        items = groups[key]
+        items.sort(key=lambda x: (x.message_time or x.created_at or datetime.utcnow()))
+        primary = items[0]
+
+        sources = []
+        seen_sources = set()
+        for item in items:
+            src_key = (item.platform, item.source_username, item.message_url)
+            if src_key in seen_sources:
+                continue
+            seen_sources.add(src_key)
+            sources.append({
+                "source": item.source_username,
+                "url": item.message_url,
+                "time": display_time(item.message_time or item.created_at),
+                "platform": item.platform,
+                "is_primary": item.id == primary.id
+            })
+
+        row = SimpleNamespace(**primary.__dict__)
+        row.source_variants = sources
+        row.duplicate_count = len(sources)
+        row.source_username = primary.source_username
+        row.message_url = primary.message_url
+        row.message_time = primary.message_time
+        display.append(row)
+
+    display.sort(key=lambda x: (x.message_time or x.created_at or datetime.utcnow()), reverse=True)
+    return display
+
 def save_result(item):
     s=db()
     try:
@@ -181,8 +244,27 @@ def get_results(q=None,keyword=None,source=None,platform=None,language=None,sent
         for r in rows:
             if r.message_time is None:
                 r.message_time = normalize_time_uz(r.created_at)
-        return rows
+        return group_duplicate_results(rows)
     finally: s.close()
+
+
+def get_results_raw(q=None,keyword=None,source=None,platform=None,language=None,sentiment=None,limit=10000):
+    s=db()
+    try:
+        query=s.query(Result)
+        if q: query=query.filter(Result.message_text.ilike(f'%{q}%'))
+        if keyword: query=query.filter(Result.matched_keyword==keyword)
+        if source: query=query.filter(Result.source_username==source)
+        if platform: query=query.filter(Result.platform==platform)
+        if language: query=query.filter(Result.source_language==language)
+        if sentiment: query=query.filter(Result.sentiment==sentiment)
+        rows=query.order_by(Result.created_at.desc()).limit(limit).all()
+        for r in rows:
+            if r.message_time is None:
+                r.message_time = normalize_time_uz(r.created_at)
+        return rows
+    finally:
+        s.close()
 
 def cnt_source(username):
     s=db()

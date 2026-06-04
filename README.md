@@ -128,3 +128,19 @@ Qo‘shildi/tuzatildi:
 - Dropdown ichidagi qidiruv ishlaydi.
 - Input listener external JS orqali ishlaydi.
 - Qidiruv paytida Barchasi yashiriladi.
+
+
+## v5.1.2 Dropdown search cache fix
+- Eski JS cache muammosi bartaraf etildi.
+- Yangi fayl: /static/multiselect_v512.js?v=512
+- Qidiruv input va keyup eventlari orqali ishlaydi.
+
+
+## v5.1.3 Duplicate source dropdown
+Qo‘shildi:
+- Bir xil xabarlar bazada saqlanadi, lekin Dashboard/Results ekranda bitta ko‘rinadi.
+- Source ustunida: OPER_UZ ⭐ (+4) ▼ ko‘rinishi.
+- Dropdown ichida: 1. OPER_UZ ⭐, 2. Qoraxabar, 3. ...
+- Kanal tanlansa shu qatordagi Time va Link avtomatik o‘zgaradi.
+- Dropdown ichida vaqt ko‘rsatilmaydi.
+- Yangi ustun qo‘shilmadi.
