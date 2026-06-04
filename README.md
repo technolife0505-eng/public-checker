@@ -122,3 +122,9 @@ Qo‘shildi/tuzatildi:
 - Dropdown tugmalari kengroq qilindi, matn chiqib ketmaydi.
 - Har bir dropdown ichiga qidiruv inputi qo‘shildi.
 - Platforma/Kanal/Kalit so‘z ro‘yxatidan tez qidirish ishlaydi.
+
+
+## v5.1.1 Dropdown search fix
+- Dropdown ichidagi qidiruv ishlaydi.
+- Input listener external JS orqali ishlaydi.
+- Qidiruv paytida Barchasi yashiriladi.
