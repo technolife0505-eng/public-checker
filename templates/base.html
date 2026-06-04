@@ -451,6 +451,96 @@ button.danger,.danger-box .danger{background:#ef4444!important;color:white!impor
 /* v5.1.1 dropdown search fix */
 .ms-search{position:sticky!important;top:0!important;z-index:2!important}
 
+
+/* v5.1.2 search cache fix */
+.ms-search{position:sticky!important;top:0!important;z-index:5!important}
+
+
+/* v5.1.3 duplicate source dropdown */
+.dup-source-cell{
+  min-width:150px;
+  overflow:visible!important;
+}
+.dup-source{
+  position:relative;
+  display:inline-block;
+  max-width:190px;
+  overflow:visible!important;
+}
+.dup-source-btn{
+  width:100%;
+  min-width:145px;
+  max-width:190px;
+  height:34px;
+  border-radius:10px;
+  border:1px solid rgba(96,165,250,.45);
+  background:#1e3a5f;
+  color:#e5e7eb;
+  font-weight:800;
+  font-size:13px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:0 9px;
+  cursor:pointer;
+}
+.dup-source-label{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.dup-chevron{
+  flex:0 0 auto;
+  color:#bfdbfe;
+  font-size:11px;
+}
+.dup-source-menu{
+  display:none;
+  position:absolute;
+  left:0;
+  top:40px;
+  width:230px;
+  max-height:260px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  background:#08111f;
+  border:1px solid #60a5fa;
+  border-radius:12px;
+  padding:6px;
+  box-shadow:0 18px 55px rgba(0,0,0,.65);
+  z-index:2147483647;
+}
+.dup-source-menu.open{
+  display:block;
+}
+.dup-source-option{
+  width:100%;
+  text-align:left;
+  border:none;
+  background:transparent;
+  color:#e5e7eb;
+  padding:9px 10px;
+  border-radius:9px;
+  font-weight:700;
+  cursor:pointer;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.dup-source-option:hover{
+  background:rgba(37,99,235,.28);
+}
+.source-link{
+  color:#93c5fd;
+  text-decoration:none;
+  font-weight:800;
+}
+.source-link:hover{text-decoration:underline}
+.dup-source-menu::-webkit-scrollbar{width:0;height:0}
+.dup-source-menu{scrollbar-width:none}
+.table-wrap, table, tbody, tr, td, .card, .section{overflow:visible!important}
+
 </style></head><body><div class="layout"><aside class="sidebar"><div class="logo">AI</div><h1>Media Monitoring Platform</h1><p>Telegram real ishlaydi. Multi-platform tayyor.</p><div class="nav"><a href="/dashboard" class="{% if active_page=='dashboard' %}active{% endif %}">Dashboard</a><a href="/sources" class="{% if active_page=='sources' %}active{% endif %}">Sources</a><a href="/autoscan" class="{% if active_page=='autoscan' %}active{% endif %}">Auto Scan</a><a href="/keywords" class="{% if active_page=='keywords' %}active{% endif %}">Keywords / Gaplar</a><a href="/analytics" class="{% if active_page=='analytics' %}active{% endif %}">Analytics</a><a href="/results" class="{% if active_page=='results' %}active{% endif %}">Results</a></div><a class="nav {% if active_page=='settings' %}active{% endif %}" href="/settings">Settings</a>
 </aside><main class="main"><div class="top"><div><h2>{% block title %}{% endblock %}</h2><p>{% block subtitle %}{% endblock %}</p></div><div class="live">● AUTO SCAN {{ interval }}s</div></div>{% if msg %}<div class="msgbox">{{ msg }}</div>{% endif %}{% block content %}{% endblock %}</main></div><script>if("Notification" in window&&Notification.permission!=="granted"){Notification.requestPermission()}let lastCount={{ stats.total_results }};setInterval(async()=>{try{const r=await fetch('/api/live?ts='+Date.now());const d=await r.json();const current=d.stats.total_results||0;if(current>lastCount){if("Notification" in window&&Notification.permission==="granted"){new Notification("Yangi monitoring natijasi",{body:"Yangi mos xabar topildi. Sahifa yangilanmoqda..."})}setTimeout(()=>window.location.reload(),1200)}lastCount=current}catch(e){}},15000);</script>
 <script>
@@ -487,5 +577,6 @@ function setQuickRange(prefix,days){const end=new Date(),start=new Date();start.
 function clearDateRange(prefix){document.getElementById(prefix+"FromText").value="";document.getElementById(prefix+"FromValue").value="";document.getElementById(prefix+"ToText").value="";document.getElementById(prefix+"ToValue").value="";closePickers()}
 document.addEventListener("click",function(e){const trigger=e.target.closest("[data-datepicker-key]");if(trigger){e.preventDefault();openCustomPicker(trigger.getAttribute("data-datepicker-key"));return}if(!e.target.closest(".custom-date-wrap")) closePickers()});
 </script>
-{% block scripts %}{% endblock %}<script src="/static/multiselect.js"></script>
+{% block scripts %}{% endblock %}<script src="/static/multiselect_v512.js?v=512"></script>
+<script src="/static/duplicates_v513.js?v=513"></script>
 </body></html>

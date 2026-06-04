@@ -94,7 +94,30 @@
 <thead><tr><th>Time</th><th>Platform</th><th>Source</th><th>Keyword</th><th>AI class</th><th>Sentiment</th><th>Text</th><th>Link</th></tr></thead>
 <tbody>
 {% for r in results %}
-<tr><td>{{ (r.message_time or r.created_at).strftime('%Y-%m-%d %H:%M:%S') if (r.message_time or r.created_at) else '' }}</td><td>{{ r.platform }}</td><td>{{ r.source_username }}</td><td>{{ r.matched_keyword }}</td><td><span class="badge">{{ r.ai_classification }}</span></td><td><span class="badge {{ r.sentiment }}">{{ r.sentiment }}</span></td><td class="text">{{ r.message_text }}</td><td><a href="{{ r.message_url }}" target="_blank">Open</a></td></tr>
+<tr><td class="dup-time-cell">{{ (r.message_time or r.created_at).strftime('%Y-%m-%d %H:%M:%S') if (r.message_time or r.created_at) else '' }}</td><td>{{ r.platform }}</td><td class="dup-source-cell">
+  {% set variants = r.source_variants if r.source_variants is defined else [] %}
+  {% if variants and variants|length > 1 %}
+  <div class="dup-source" data-row="{{ r.id }}">
+    <button type="button" class="dup-source-btn" onclick="return window.mmToggleDuplicateSource(this)">
+      <span class="dup-source-label">{{ variants[0].source }} ⭐ (+{{ variants|length - 1 }})</span>
+      <span class="dup-chevron">▾</span>
+    </button>
+    <div class="dup-source-menu">
+      {% for v in variants %}
+      <button type="button" class="dup-source-option"
+              data-source="{{ v.source }}"
+              data-time="{{ v.time }}"
+              data-url="{{ v.url }}"
+              onclick="return window.mmSelectDuplicateSource(this)">
+        {{ loop.index }}. {{ v.source }}{% if loop.first %} ⭐{% endif %}
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <a class="source-link" href="{{ r.message_url }}" target="_blank">{{ r.source_username }}</a>
+  {% endif %}
+</td><td>{{ r.matched_keyword }}</td><td><span class="badge">{{ r.ai_classification }}</span></td><td><span class="badge {{ r.sentiment }}">{{ r.sentiment }}</span></td><td class="text">{{ r.message_text }}</td><td class="dup-link-cell"><a href="{{ r.message_url }}" target="_blank">Open</a></td></tr>
 {% else %}
 <tr><td colspan="8">Hali natija yo‘q.</td></tr>
 {% endfor %}
@@ -124,4 +147,7 @@ bar('sourceChart',sourceData.map(x=>x.name),sourceData.map(x=>x.count));
 
 
 
-<script src="/static/multiselect.js"></script>
+
+<script src="/static/multiselect_v512.js?v=512"></script>
+
+<script src="/static/duplicates_v513.js?v=513"></script>
