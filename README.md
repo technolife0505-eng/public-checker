@@ -144,3 +144,12 @@ Qo‘shildi:
 - Kanal tanlansa shu qatordagi Time va Link avtomatik o‘zgaradi.
 - Dropdown ichida vaqt ko‘rsatilmaydi.
 - Yangi ustun qo‘shilmadi.
+
+
+## v5.1.4 Duplicate grouping + scroll fix
+Tuzatildi:
+- Results/Dashboard jadvali yana blok ichida scroll bo‘ladi.
+- Duplicate grouping keywordga bog‘lanmaydi; bir xil matnlar bitta ko‘rinadi.
+- Count ustuni duplicate kanal sonini ko‘rsatadi.
+- Source dropdown click ishlashi uchun JS qayta yozildi.
+- Dropdown fixed position bilan ochiladi, scroll blok ichida kesilmaydi.

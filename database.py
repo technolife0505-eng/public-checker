@@ -168,15 +168,14 @@ def duplicate_norm_text(text):
     t = re.sub(r"t\.me/\S+", " ", t)
     t = re.sub(r"@\w+", " ", t)
     t = re.sub(r"#\w+", " ", t)
-    # remove most emoji/symbol noise but keep letters/numbers/punctuation spacing light
+    t = re.sub(r"\b(reklama|реклама|batafsil|подробнее|kanal|канал)\b", " ", t)
     t = re.sub(r"[^\w\sА-Яа-яЁёЎўҚқҒғҲҳІі'-]+", " ", t, flags=re.UNICODE)
     t = re.sub(r"\s+", " ", t).strip()
-    return t
+    return t[:700]
 
 def duplicate_key(result):
     base = duplicate_norm_text(getattr(result, "message_text", ""))
-    kw = normalize_keyword_text(getattr(result, "matched_keyword", ""))
-    return hashlib.sha1((kw + "||" + base).encode("utf-8", errors="ignore")).hexdigest()
+    return hashlib.sha1(base.encode("utf-8", errors="ignore")).hexdigest() if base else str(getattr(result, "id", ""))
 
 def group_duplicate_results(rows):
     """Return display rows. DB still keeps every result, but UI gets one row per duplicate group."""
@@ -198,7 +197,7 @@ def group_duplicate_results(rows):
         sources = []
         seen_sources = set()
         for item in items:
-            src_key = (item.platform, item.source_username, item.message_url)
+            src_key = (item.platform, item.source_username)
             if src_key in seen_sources:
                 continue
             seen_sources.add(src_key)
@@ -213,6 +212,7 @@ def group_duplicate_results(rows):
         row = SimpleNamespace(**primary.__dict__)
         row.source_variants = sources
         row.duplicate_count = len(sources)
+        row.repetition_count = len(sources)
         row.source_username = primary.source_username
         row.message_url = primary.message_url
         row.message_time = primary.message_time
