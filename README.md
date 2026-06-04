@@ -114,3 +114,11 @@ Tuzatildi:
 ## v5.0.9 Dropdown JS fixed
 - toggleMS is not defined xatosi tuzatildi.
 - Dropdown JS /static/multiselect.js fayliga chiqarildi.
+
+
+## v5.1.0 Dropdown polish + search
+Qo‘shildi/tuzatildi:
+- Pastga qaragan strelka chiroyli chevron icon ko‘rinishiga o‘tkazildi.
+- Dropdown tugmalari kengroq qilindi, matn chiqib ketmaydi.
+- Har bir dropdown ichiga qidiruv inputi qo‘shildi.
+- Platforma/Kanal/Kalit so‘z ro‘yxatidan tez qidirish ishlaydi.
