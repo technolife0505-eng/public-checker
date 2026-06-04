@@ -383,6 +383,70 @@ button.danger,.danger-box .danger{background:#ef4444!important;color:white!impor
 .ms-menu{scrollbar-width:none!important}
 .card,.section,form,main,.content,.container,.scan-controls-line,.scan-filter-row{overflow:visible!important}
 
+
+/* v5.1.0 dropdown polish + search */
+.scan-controls-line .ms-wrap{
+  width:240px!important;
+  flex:0 0 240px!important;
+}
+.scan-controls-line .ms-btn{
+  overflow:hidden!important;
+  gap:10px!important;
+}
+.scan-controls-line .ms-btn span:first-child{
+  display:block!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  min-width:0!important;
+}
+.ms-chevron{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:18px!important;
+  height:18px!important;
+  border-radius:999px!important;
+  font-size:12px!important;
+  line-height:1!important;
+  color:#dbeafe!important;
+  background:rgba(96,165,250,.16)!important;
+  flex:0 0 auto!important;
+}
+.ms-menu{
+  width:390px!important;
+  padding:10px!important;
+}
+.ms-search{
+  width:100%!important;
+  height:40px!important;
+  margin:0 0 8px 0!important;
+  padding:0 12px!important;
+  border-radius:10px!important;
+  border:1px solid rgba(147,197,253,.45)!important;
+  background:#020617!important;
+  color:#fff!important;
+  outline:none!important;
+  box-sizing:border-box!important;
+  font-weight:700!important;
+}
+.ms-search::placeholder{
+  color:#94a3b8!important;
+}
+.ms-search:focus{
+  border-color:#60a5fa!important;
+  box-shadow:0 0 0 3px rgba(96,165,250,.16)!important;
+}
+.ms-option{
+  max-width:100%!important;
+}
+@media(max-width:1300px){
+  .scan-controls-line .ms-wrap{
+    width:220px!important;
+    flex-basis:220px!important;
+  }
+}
+
 </style></head><body><div class="layout"><aside class="sidebar"><div class="logo">AI</div><h1>Media Monitoring Platform</h1><p>Telegram real ishlaydi. Multi-platform tayyor.</p><div class="nav"><a href="/dashboard" class="{% if active_page=='dashboard' %}active{% endif %}">Dashboard</a><a href="/sources" class="{% if active_page=='sources' %}active{% endif %}">Sources</a><a href="/autoscan" class="{% if active_page=='autoscan' %}active{% endif %}">Auto Scan</a><a href="/keywords" class="{% if active_page=='keywords' %}active{% endif %}">Keywords / Gaplar</a><a href="/analytics" class="{% if active_page=='analytics' %}active{% endif %}">Analytics</a><a href="/results" class="{% if active_page=='results' %}active{% endif %}">Results</a></div><a class="nav {% if active_page=='settings' %}active{% endif %}" href="/settings">Settings</a>
 </aside><main class="main"><div class="top"><div><h2>{% block title %}{% endblock %}</h2><p>{% block subtitle %}{% endblock %}</p></div><div class="live">● AUTO SCAN {{ interval }}s</div></div>{% if msg %}<div class="msgbox">{{ msg }}</div>{% endif %}{% block content %}{% endblock %}</main></div><script>if("Notification" in window&&Notification.permission!=="granted"){Notification.requestPermission()}let lastCount={{ stats.total_results }};setInterval(async()=>{try{const r=await fetch('/api/live?ts='+Date.now());const d=await r.json();const current=d.stats.total_results||0;if(current>lastCount){if("Notification" in window&&Notification.permission==="granted"){new Notification("Yangi monitoring natijasi",{body:"Yangi mos xabar topildi. Sahifa yangilanmoqda..."})}setTimeout(()=>window.location.reload(),1200)}lastCount=current}catch(e){}},15000);</script>
 <script>

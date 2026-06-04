@@ -38,9 +38,9 @@
 <div class="scan-controls-line"><div class="scan-filter-row">
   <div class="ms-wrap" data-ms="platforms">
     <button type="button" class="ms-btn" onclick="return window.mmToggleMS(this)">
-      <span id="platformsLabel">Platformalar: Barchasi</span><b>⌄</b>
+      <span id="platformsLabel">Platformalar: Barchasi</span><span class="ms-chevron">▾</span>
     </button>
-    <div class="ms-menu" id="platformsMenu">
+    <div class="ms-menu" id="platformsMenu"><input type="text" class="ms-search" placeholder="Platforma qidirish..." oninput="filterMSOptions(this)">
       <label class="ms-option"><input type="checkbox" data-group-all="platforms" checked> Barchasi</label>
       {% for p in platforms %}
       <label class="ms-option"><input type="checkbox" name="platforms" value="{{ p }}" data-group-item="platforms"> {{ p }}</label>
@@ -50,9 +50,9 @@
 
   <div class="ms-wrap" data-ms="sources">
     <button type="button" class="ms-btn" onclick="return window.mmToggleMS(this)">
-      <span id="sourcesLabel">Kanallar: Barchasi</span><b>⌄</b>
+      <span id="sourcesLabel">Kanallar: Barchasi</span><span class="ms-chevron">▾</span>
     </button>
-    <div class="ms-menu" id="sourcesMenu">
+    <div class="ms-menu" id="sourcesMenu"><input type="text" class="ms-search" placeholder="Kanal qidirish..." oninput="filterMSOptions(this)">
       <label class="ms-option"><input type="checkbox" data-group-all="sources" checked> Barchasi</label>
       {% for s in sources_list %}
       <label class="ms-option"><input type="checkbox" name="source_ids" value="{{ s.id }}" data-group-item="sources"> {{ s.name or s.link }}</label>
@@ -62,9 +62,9 @@
 
   <div class="ms-wrap" data-ms="keywords">
     <button type="button" class="ms-btn" onclick="return window.mmToggleMS(this)">
-      <span id="keywordsLabel">Kalit so‘zlar: Barchasi</span><b>⌄</b>
+      <span id="keywordsLabel">Kalit so‘zlar: Barchasi</span><span class="ms-chevron">▾</span>
     </button>
-    <div class="ms-menu" id="keywordsMenu">
+    <div class="ms-menu" id="keywordsMenu"><input type="text" class="ms-search" placeholder="Kalit so‘z qidirish..." oninput="filterMSOptions(this)">
       <label class="ms-option"><input type="checkbox" data-group-all="keywords" checked> Barchasi</label>
       {% for k in keywords_list %}
       <label class="ms-option"><input type="checkbox" name="keyword_ids" value="{{ k.id }}" data-group-item="keywords"> {{ k.keyword }}</label>
